@@ -1,10 +1,110 @@
 const video = document.getElementById('videoPlayer');
-const loader = document.getElementById('loader');
 const playBtn = document.getElementById('playBtn');
-const WORKER_URL = "https://abdullah965-iptv.hf.space";
-let hls;
-let isFirstPlay = true; // প্রথমবার চেক করার জন্য
+const miniLoader = document.getElementById('miniLoader');
+const volumeSlider = document.getElementById('volumeSlider');
+const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
+let hls = null;
+let currentChannelId = null;
+
+// HLS কনফিগারেশন: বাফারিং কমানোর জন্য অপ্টিমাইজড
+const hlsConfig = {
+    enableWorker: true, // ব্রাউজারের আলাদা থ্রেড ব্যবহার করবে, ফলে মেইন সাইট স্লো হবে না
+    lowLatencyMode: true, // লাইভ ভিডিওর জন্য ল্যাটেন্সি কমাবে
+    backBufferLength: 90, // পিছনে ৯০ সেকেন্ডের ভিডিও সেভ রাখবে যাতে রিওয়াইন্ড করলে বাফার না হয়
+    maxBufferLength: 30, // সামনে ৩০ সেকেন্ডের ভিডিও সবসময় লোড করে রাখবে
+    maxMaxBufferLength: 60,
+    maxBufferSize: 50 * 1000 * 1000, // ৫০ মেগাবাইট পর্যন্ত ডেটা বাফার করবে
+    startLevel: -1, // ইন্টারনেটের স্পিড অনুযায়ী অটো কোয়ালিটি সিলেক্ট করবে
+    abandonFragmentOnPause: false,
+    fragLoadingMaxRetry: 10, // নেট চলে গেলে ১০ বার অটো ট্রাই করবে
+    levelLoadingMaxRetry: 10
+};
+
+async function loadChannel(id, name) {
+    if (id === currentChannelId) return;
+
+    miniLoader.classList.remove('hidden');
+    document.getElementById('videoTitle').innerText = `সংযুক্ত হচ্ছে: ${name}...`;
+
+    try {
+        const res = await fetch(`${WORKER_URL}/api/get-stream?id=${id}`);
+        const data = await res.json();
+
+        if (data.success) {
+            const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
+            
+            if (Hls.isSupported()) {
+                if (hls) {
+                    hls.stopLoad(); // আগের লোডিং বন্ধ করবে
+                    hls.detachMedia();
+                    hls.destroy();
+                }
+
+                hls = new Hls(hlsConfig);
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play().catch(() => {
+                        // অটো প্লে ব্লক হলে প্লে বাটন দেখাবে
+                        playBtn.innerHTML = '<i class="fa fa-play"></i>';
+                    });
+                    miniLoader.classList.add('hidden');
+                    document.getElementById('videoTitle').innerText = name;
+                    playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+                    currentChannelId = id;
+                });
+
+                // ভিডিও আটকে গেলে অটোমেটিক রিকভার করার লজিক
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                loadChannel(id, name);
+                                break;
+                        }
+                    }
+                });
+
+            } else {
+                // সাফারি বা আইফোনের জন্য
+                video.src = streamUrl;
+                video.addEventListener('canplay', () => {
+                    video.play();
+                    miniLoader.classList.add('hidden');
+                    document.getElementById('videoTitle').innerText = name;
+                });
+            }
+        }
+    } catch (e) {
+        console.error("Stream Error:", e);
+        miniLoader.classList.add('hidden');
+    }
+}
+
+function togglePlay() {
+    if (video.paused) {
+        video.play();
+        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+    } else {
+        video.pause();
+        playBtn.innerHTML = '<i class="fa fa-play"></i>';
+    }
+}
+
+// ভলিউম কন্ট্রোল
+volumeSlider.addEventListener('input', (e) => {
+    video.volume = e.target.value;
+});
+
+// চ্যানেল লিস্ট রেন্ডার
 const channels = [
     // Sports Category
     { id: '88', name: 'A SPORTS HD', cat: 'Sports', img: 'http://103.144.89.251/assets/images/A SPORTS HD1745044782.png', icon: 'fa-trophy' },
@@ -111,82 +211,35 @@ const channels = [
     { id: '86', name: 'PEACE TV BANGLA', cat: 'Islamic', img: 'http://103.144.89.251/assets/images/PEACE TV BANGLA1745044480.png', icon: 'fa-mosque' }
 ];
 
-const allCategories = ['all', 'Bangla', 'Sports', 'English', 'Hindi', 'Islamic', 'Kids'];
-
-async function loadChannel(id, name, autoPlay = false) {
-    loader.classList.remove('hidden');
-    document.getElementById('videoTitle').innerText = name;
-    
-    try {
-        const res = await fetch(`${WORKER_URL}/api/get-stream?id=${id}`);
-        const data = await res.json();
-        if(data.success) {
-            const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
-            if(hls) hls.destroy();
-            
-            if(Hls.isSupported()) {
-                hls = new Hls();
-                hls.loadSource(streamUrl);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    loader.classList.add('hidden');
-                    if(autoPlay) {
-                        video.play();
-                        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
-                    }
-                });
-            } else {
-                video.src = streamUrl;
-                if(autoPlay) video.play();
-                loader.classList.add('hidden');
-            }
-        }
-    } catch(e) { loader.classList.add('hidden'); }
-}
-
-// স্ক্রিনের যেকোনো জায়গায় বা বাটনে ক্লিক করলে প্লে/পজ হবে
-function togglePlay() {
-    if(video.paused) {
-        video.play();
-        playBtn.innerHTML = '<i class="fa fa-pause"></i>';
-        isFirstPlay = false; // প্রথমবার ক্লিক হয়ে গেছে
-        document.getElementById('hintText').style.display = 'none';
-    } else {
-        video.pause();
-        playBtn.innerHTML = '<i class="fa fa-play"></i>';
-    }
-}
-
 function renderChannels(f = 'all', q = '') {
     const grid = document.getElementById('channelGrid');
     grid.innerHTML = '';
     channels.forEach(ch => {
-        if(f !== 'all' && ch.cat !== f) return;
-        if(q && !ch.name.toLowerCase().includes(q.toLowerCase())) return;
+        if (f !== 'all' && ch.cat !== f) return;
+        if (q && !ch.name.toLowerCase().includes(q.toLowerCase())) return;
         const div = document.createElement('div');
         div.className = 'ch-card';
         div.onclick = () => {
-            // যদি ইউজার একবার প্লে করে থাকে, তবে পরেরগুলো অটোমেটিক প্লে হবে
-            loadChannel(ch.id, ch.name, !isFirstPlay);
-            if(window.innerWidth < 768) window.scrollTo({top: 0, behavior: 'smooth'});
+            loadChannel(ch.id, ch.name);
+            if (window.innerWidth < 768) window.scrollTo({ top: 0, behavior: 'smooth' });
         };
         div.innerHTML = `<img src="https://wsrv.nl/?url=${encodeURIComponent(ch.img)}&w=120" class="h-10 mx-auto mb-2"><span class="text-[10px] font-bold uppercase">${ch.name}</span>`;
         grid.appendChild(div);
     });
 }
 
+const allCategories = ['all', 'Bangla', 'Sports', 'English', 'Hindi', 'Islamic', 'Kids'];
+
 function setup() {
     const pc = document.getElementById('pc-nav');
     const mob = document.getElementById('mobile-nav');
-    
     allCategories.forEach(c => {
         const icon = c === 'all' ? 'fa-border-all' : (channels.find(ch => ch.cat === c)?.icon || 'fa-tv');
         const btn = `<button onclick="filterCat('${c}', this)" class="nav-link ${c === 'all' ? 'active' : ''}"><i class="fa-solid ${icon}"></i><span>${c}</span></button>`;
         pc.innerHTML += btn; mob.innerHTML += btn;
     });
-    
     renderChannels();
-    loadChannel(channels[0].id, channels[0].name, false); // প্রথমটা জাস্ট লোড হবে
+    loadChannel(channels[0].id, channels[0].name);
 }
 
 function filterCat(c, btn) {
@@ -196,9 +249,8 @@ function filterCat(c, btn) {
 }
 
 function fullScreen() {
-    const box = document.getElementById('playerBox');
-    if(!document.fullscreenElement) box.requestFullscreen();
-    else document.exitFullscreen();
+    if (video.requestFullscreen) video.requestFullscreen();
+    else if (video.webkitRequestFullscreen) video.webkitRequestFullscreen();
 }
 
 function search() { renderChannels('all', document.getElementById('searchInput').value); }
