@@ -27,28 +27,38 @@
 
     <main class="max-w-7xl mx-auto p-4 flex flex-col lg:grid lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 player-container">
-            <div id="playerBox" onclick="togglePlay()" class="player-box aspect-video bg-black relative cursor-pointer">
-                <div id="loader" class="hidden absolute inset-0 flex items-center justify-center z-20 bg-black/40">
-                    <div class="spinner"></div>
+            <!-- Player Box -->
+            <div id="playerBox" class="player-box aspect-video bg-black relative cursor-pointer">
+                <!-- ছোট লোডার যা ভিডিওর উপরে আসবে কিন্তু ভিডিও থামাবে না -->
+                <div id="miniLoader" class="hidden absolute top-4 right-4 z-30">
+                    <div class="spinner-small"></div>
                 </div>
 
-                <video id="videoPlayer" class="w-full h-full" playsinline></video>
+                <video id="videoPlayer" class="w-full h-full" playsinline onclick="togglePlay()"></video>
 
                 <div class="controls-overlay" onclick="event.stopPropagation()">
-                    <button id="playBtn" class="text-3xl text-blue-400"><i class="fa fa-play"></i></button>
-                    <div class="flex flex-col ml-4">
-                        <span id="videoTitle" class="text-sm font-bold">চ্যানেল সিলেক্ট করুন</span>
+                    <button id="playBtn" onclick="togglePlay()" class="text-3xl text-blue-400"><i class="fa fa-play"></i></button>
+                    
+                    <div class="flex flex-col ml-4 flex-1">
+                        <span id="videoTitle" class="text-sm font-bold truncate">চ্যানেল সিলেক্ট করুন</span>
                         <span class="text-[10px] text-red-500 font-bold uppercase animate-pulse">● Live Now</span>
                     </div>
-                    <button onclick="fullScreen()" class="ml-auto text-2xl"><i class="fa fa-expand"></i></button>
+
+                    <!-- Volume Control Added -->
+                    <div class="flex items-center gap-2 mr-4 group">
+                        <i class="fa fa-volume-up text-xs"></i>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="w-16 h-1 accent-blue-500 cursor-pointer">
+                    </div>
+
+                    <button onclick="fullScreen()" class="text-2xl"><i class="fa fa-expand"></i></button>
                 </div>
             </div>
             <p id="hintText" class="text-[11px] text-blue-400 mt-2 italic text-center md:text-left">
-                * প্রথমবার ভিডিও প্লে করতে স্ক্রিনে বা প্লে আইকনে ক্লিক করুন।
+                * দ্রুত চ্যানেল পরিবর্তন করতে লিস্টে ক্লিক করুন।
             </p>
         </div>
 
-        <div>
+        <div class="channel-list-section">
             <h2 class="text-sm font-black mb-4 border-l-4 border-blue-500 pl-3 uppercase">Channel Guide</h2>
             <div id="channelGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4"></div>
         </div>
