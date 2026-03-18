@@ -1,0 +1,22 @@
+body { background-color: #000; color: #fff; padding-bottom: 90px; }
+.header-bg { background-color: #000; border-bottom: 2px solid #00a2ff; }
+
+.nav-link { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px; color: #777; transition: 0.3s; min-width: 62px; }
+.nav-link.active { color: #00a2ff; background: rgba(0,162,255,0.15); border-radius: 8px; }
+.nav-link i { font-size: 1.1rem; }
+.nav-link span { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; }
+
+.player-container { position: sticky; top: 85px; z-index: 40; background: #000; }
+.player-box { border-radius: 12px; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 0 20px rgba(0,162,255,0.1); }
+.controls-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: flex; align-items: center; pointer-events: auto; }
+
+.spinner { width: 45px; height: 45px; border: 4px solid #333; border-top-color: #00a2ff; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ch-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s; cursor: pointer; }
+.ch-card:hover { border-color: #00a2ff; transform: scale(1.03); background: #111; }
+
+.mobile-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #000; border-top: 1px solid #222; display: flex; overflow-x: auto; padding: 5px; z-index: 100; }
+.mobile-menu::-webkit-scrollbar { display: none; }
+
+@media (min-width: 768px) { body { padding-bottom: 0; } }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RYVOX Tb - Smart IPTV</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="header-bg p-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-col items-center md:items-start">
+                <h1 class="text-3xl font-black italic tracking-tighter">RYVOX <span class="text-blue-500">Tb</span></h1>
+                <p class="text-[10px] text-gray-500">ryvox.tb@gmail.com</p>
+            </div>
+            <nav class="hidden md:flex gap-1" id="pc-nav"></nav>
+            <div class="flex w-full md:w-64 border border-gray-700 rounded overflow-hidden">
+                <input type="text" id="searchInput" onkeyup="search()" placeholder="Search Tv..." class="w-full bg-white text-black px-3 py-1 text-sm outline-none">
+                <button class="bg-blue-500 px-4 text-white"><i class="fa fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 flex flex-col lg:grid lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 player-container">
+            <div id="playerBox" onclick="togglePlay()" class="player-box aspect-video bg-black relative cursor-pointer">
+                <div id="loader" class="hidden absolute inset-0 flex items-center justify-center z-20 bg-black/40">
+                    <div class="spinner"></div>
+                </div>
+
+                <video id="videoPlayer" class="w-full h-full" playsinline></video>
+
+                <div class="controls-overlay" onclick="event.stopPropagation()">
+                    <button id="playBtn" class="text-3xl text-blue-400"><i class="fa fa-play"></i></button>
+                    <div class="flex flex-col ml-4">
+                        <span id="videoTitle" class="text-sm font-bold">চ্যানেল সিলেক্ট করুন</span>
+                        <span class="text-[10px] text-red-500 font-bold uppercase animate-pulse">● Live Now</span>
+                    </div>
+                    <button onclick="fullScreen()" class="ml-auto text-2xl"><i class="fa fa-expand"></i></button>
+                </div>
+            </div>
+            <p id="hintText" class="text-[11px] text-blue-400 mt-2 italic text-center md:text-left">
+                * প্রথমবার ভিডিও প্লে করতে স্ক্রিনে বা প্লে আইকনে ক্লিক করুন।
+            </p>
+        </div>
+
+        <div>
+            <h2 class="text-sm font-black mb-4 border-l-4 border-blue-500 pl-3 uppercase">Channel Guide</h2>
+            <div id="channelGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4"></div>
+        </div>
+    </main>
+
+    <div class="mobile-menu md:hidden" id="mobile-nav"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
