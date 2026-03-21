@@ -10,22 +10,24 @@ const channels = [
 
 const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
-// ==================== OPTIMIZED HLS CONFIG FOR FAST LOADING ====================
+// ==================== ULTRA-FAST HLS CONFIG ====================
+// লোডিং সমস্যা দূর করতে বাফার এবং রিট্রাই পলিসি অপ্টিমাইজ করা হয়েছে
 const hlsConfig = {
     enableWorker: true,
-    lowLatencyMode: true,
-    maxBufferLength: 8,
-    maxMaxBufferLength: 16,
-    startLevel: -1,              // Auto-select best quality
+    lowLatencyMode: true,            // ল্যাটেন্সি কমানোর জন্য
+    maxBufferLength: 5,              // বাফার ৫ সেকেন্ডে নামিয়ে আনা হয়েছে যাতে দ্রুত স্টার্ট হয়
+    maxMaxBufferLength: 10,
+    maxBufferSize: 30 * 1000 * 1000, // মেমোরি লোড কমাতে ৩০ এমবি বাফার লিমিট
+    startLevel: -1,                  // অটো বেস্ট কোয়ালিটি
     testBandwidth: true,
-    abrEwmaDefaultEstimate: 500000,
-    abrEwmaFastLive: 3,
-    abrEwmaSlowLive: 9,
-    manifestLoadingTimeOut: 10000,
-    levelLoadingTimeOut: 8000,
-    fragLoadingTimeOut: 10000,
-    startFragPrefetch: true,     // Prefetch fragments for faster start
-    progressive: true
+    progressive: true,               // প্রোগ্রেসিভ ডাউনলোডিং
+    startFragPrefetch: true,         // প্রথম ফ্র্যাগমেন্ট আগেভাগেই লোড করবে
+    
+    // রিট্রাই পলিসি: নেটওয়ার্ক দুর্বল হলেও কানেকশন ধরে রাখবে
+    manifestLoadingMaxRetry: 10,
+    manifestLoadingRetryDelay: 500,
+    levelLoadingMaxRetry: 10,
+    fragLoadingMaxRetry: 10
 };
 
 // ==================== DOM ELEMENTS ====================
@@ -46,23 +48,18 @@ let idleTimer = null;
 let isMuted = false;
 let sidebarMobileVisible = true;
 
-// ==================== VIDEO PLAY/PAUSE TOGGLE (CLICK ON VIDEO) ====================
+// ==================== PLAYBACK & UI CONTROLS ====================
 function togglePlayPause() {
     if (video.paused) {
-        video.play().catch(e => console.log("Playback prevented:", e));
+        video.play().catch(e => console.log("Play failed:", e));
     } else {
         video.pause();
     }
     showUIAndReset();
 }
 
-// Attach video click event
-video.addEventListener('click', (e) => {
-    e.stopPropagation();
-    togglePlayPause();
-});
+video.addEventListener('click', (e) => { e.stopPropagation(); togglePlayPause(); });
 
-// ==================== AUTO-HIDE UI SYSTEM (Only Sidebar & Controls, Logo Always Visible) ====================
 function showUIAndReset() {
     document.body.classList.remove('ui-hidden');
     resetIdleTimer();
@@ -73,137 +70,61 @@ function resetIdleTimer() {
     if (!video.paused) {
         idleTimer = setTimeout(() => {
             document.body.classList.add('ui-hidden');
-        }, 4800);
+        }, 4000); // ৪ সেকেন্ড পর UI হাইড হবে
     }
 }
 
-// User activity triggers UI show
-window.addEventListener('mousemove', showUIAndReset);
-window.addEventListener('touchstart', showUIAndReset);
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && document.activeElement !== searchInput) {
-        e.preventDefault();
-        togglePlayPause();
-        showUIAndReset();
-    } else {
-        showUIAndReset();
-    }
-});
+// Activity events
+['mousemove', 'touchstart', 'keydown'].forEach(evt => 
+    window.addEventListener(evt, showUIAndReset)
+);
 
-video.addEventListener('play', () => {
-    resetIdleTimer();
-});
-
-video.addEventListener('pause', () => {
-    if (idleTimer) clearTimeout(idleTimer);
-    document.body.classList.remove('ui-hidden');
-});
-
-// ==================== VOLUME CONTROL ====================
-function updateVolumeIcon() {
-    if (video.volume === 0 || isMuted) {
-        volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-    } else if (video.volume < 0.5) {
-        volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
-    } else {
-        volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-    }
-}
-
+// Volume logic
 volumeSlider.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    video.volume = val;
-    isMuted = false;
-    if (val === 0) isMuted = true;
+    video.volume = e.target.value;
+    isMuted = (video.volume === 0);
     updateVolumeIcon();
-    showUIAndReset();
 });
 
-volumeBtn.addEventListener('click', () => {
-    if (video.volume > 0 && !isMuted) {
-        video.volume = 0;
-        isMuted = true;
-        volumeSlider.value = 0;
-    } else {
-        video.volume = 0.8;
-        isMuted = false;
-        volumeSlider.value = 0.8;
-    }
-    updateVolumeIcon();
-    showUIAndReset();
-});
+function updateVolumeIcon() {
+    if (video.volume === 0 || isMuted) volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    else if (video.volume < 0.5) volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+    else volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+}
 
-// ==================== FULLSCREEN TOGGLE ====================
+// Fullscreen logic
 fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => console.warn(err));
-    } else {
-        document.exitFullscreen();
-    }
-    showUIAndReset();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
 });
 
-// ==================== MOBILE SIDEBAR TOGGLE ====================
-toggleListBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (window.innerWidth <= 768) {
-        if (sidebarMobileVisible) {
-            channelSidebar.style.transform = 'translateX(-100%)';
-            sidebarMobileVisible = false;
-        } else {
-            channelSidebar.style.transform = 'translateX(0%)';
-            sidebarMobileVisible = true;
-        }
-        showUIAndReset();
-    } else {
-        document.body.classList.remove('ui-hidden');
-        resetIdleTimer();
-    }
-});
-
-window.addEventListener('resize', () => {
-    if (window.innerWidth > 768) {
-        channelSidebar.style.transform = '';
-        sidebarMobileVisible = true;
-    } else {
-        if (!sidebarMobileVisible) channelSidebar.style.transform = 'translateX(-100%)';
-        else channelSidebar.style.transform = '';
-    }
-});
-
-// ==================== HLS STREAMING WITH FAST LOADING & RETRY ====================
+// ==================== STREAMING ENGINE (CRITICAL) ====================
 async function playChannel(id) {
-    if (currentChanId === id && hls && !hls?.destroyed) return;
+    if (currentChanId === id && hls) return;
     currentChanId = id;
     renderList(searchInput.value);
-    loader.classList.add('active');
+    
+    loader.classList.add('active'); // লোডার দেখানো
     
     try {
         const response = await fetch(`${WORKER_URL}/api/get-stream?id=${id}`);
         const data = await response.json();
         
         if (data.success && data.url) {
+            // প্রক্সি ইউআরএল ব্যবহার করে CORS সমস্যা এড়ানো
             const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
-            startHls(streamUrl);
+            initPlayer(streamUrl);
         } else {
-            throw new Error("Invalid stream response");
+            throw new Error("API Error");
         }
     } catch (error) {
-        console.warn("Stream fetch error, retrying in 2s:", error);
-        setTimeout(() => {
-            if (currentChanId === id) playChannel(id);
-        }, 2000);
+        console.error("Retrying channel...", error);
+        setTimeout(() => playChannel(id), 2000);
     }
 }
 
-function startHls(url) {
-    // Clean up existing HLS instance
-    if (hls) {
-        try {
-            hls.destroy();
-        } catch (e) {}
-        hls = null;
-    }
+function initPlayer(url) {
+    if (hls) hls.destroy();
     
     if (Hls.isSupported()) {
         hls = new Hls(hlsConfig);
@@ -211,137 +132,51 @@ function startHls(url) {
         hls.attachMedia(video);
         
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().then(() => {
-                loader.classList.remove('active');
-                resetIdleTimer();
-            }).catch(err => {
-                console.log("Autoplay blocked:", err);
-                loader.classList.remove('active');
+            video.play().catch(() => {
+                // ব্রাউজার অটো-প্লে ব্লক করলে মিউট করে ট্রাই করবে
+                video.muted = true;
+                video.play();
             });
         });
-        
-        // Fast start: load first fragment immediately
-        hls.on(Hls.Events.FRAG_LOADED, () => {
-            if (loader.classList.contains('active')) {
-                setTimeout(() => loader.classList.remove('active'), 500);
-            }
-        });
-        
-        // Error handling with recovery
+
+        // এরর হ্যান্ডলিং যাতে ভিডিও আটকে না যায়
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 switch (data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR:
-                        console.log("Network error, trying to recover...");
-                        hls.startLoad();
-                        break;
-                    case Hls.ErrorTypes.MEDIA_ERROR:
-                        console.log("Media error, recovering...");
-                        hls.recoverMediaError();
-                        break;
-                    default:
-                        console.error("Fatal error, restarting stream");
-                        if (currentChanId) playChannel(currentChanId);
-                        break;
+                    case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+                    case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+                    default: initPlayer(url); break;
                 }
             }
         });
-        
-        // Buffer/Loader visibility handling
-        video.addEventListener('waiting', () => {
-            if (!video.paused) loader.classList.add('active');
-        });
-        video.addEventListener('playing', () => loader.classList.remove('active'));
-        video.addEventListener('canplay', () => loader.classList.remove('active'));
-        
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Native HLS support (Safari)
+        // For Safari/iOS
         video.src = url;
-        video.addEventListener('loadedmetadata', () => {
-            video.play().catch(e => console.log(e));
-            loader.classList.remove('active');
-        });
-        video.addEventListener('stalled', () => loader.classList.add('active'));
-        video.addEventListener('playing', () => loader.classList.remove('active'));
-    } else {
-        console.error("HLS not supported in this browser");
-        loader.classList.remove('active');
     }
 }
 
-// ==================== RENDER CHANNEL LIST ====================
-function renderList(filter = "") {
-    const filtered = channels.filter(c => 
-        c.name.toLowerCase().includes(filter.toLowerCase())
-    );
-    
-    container.innerHTML = filtered.map(c => {
-        const isActive = (currentChanId === c.id);
-        const imgProxy = `https://images.weserv.nl/?url=${encodeURIComponent(c.img)}&w=70&h=70&fit=cover&a=attention`;
-        return `
-            <div class="channel-card ${isActive ? 'active' : ''}" data-id="${c.id}">
-                <img src="${imgProxy}" alt="${c.name}" class="chan-img" loading="lazy" onerror="this.src='https://placehold.co/70x70/111/00a2ff?text=TV'">
-                <div class="chan-name">${c.name}</div>
-            </div>
-        `;
-    }).join('');
-    
-    // Attach click handlers to cards
-    document.querySelectorAll('.channel-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = card.getAttribute('data-id');
-            if (id) {
-                playChannel(id);
-                showUIAndReset();
-                // Auto-close sidebar on mobile after channel selection
-                if (window.innerWidth <= 768) {
-                    channelSidebar.style.transform = 'translateX(-100%)';
-                    sidebarMobileVisible = false;
-                }
-            }
-        });
-    });
-}
-
-// ==================== SEARCH FUNCTIONALITY ====================
-searchInput.addEventListener('input', (e) => {
-    renderList(e.target.value);
-    showUIAndReset();
-});
-
-// Prevent spacebar from triggering search input
-searchInput.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        e.stopPropagation();
-    }
-});
-
-// ==================== INITIALIZATION ====================
-video.volume = 0.8;
-volumeSlider.value = 0.8;
-updateVolumeIcon();
-
-// Buffer/Loader handlers for smooth experience
-video.addEventListener('waiting', () => {
-    if (!video.paused) loader.classList.add('active');
-});
+// লোডার কন্ট্রোল
+video.addEventListener('waiting', () => loader.classList.add('active'));
 video.addEventListener('playing', () => loader.classList.remove('active'));
-video.addEventListener('canplaythrough', () => loader.classList.remove('active'));
+video.addEventListener('canplay', () => loader.classList.remove('active'));
 
-// Start the app
+// ==================== UI RENDERING ====================
+function renderList(filter = "") {
+    const filtered = channels.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
+    
+    container.innerHTML = filtered.map(c => `
+        <div class="channel-card ${currentChanId === c.id ? 'active' : ''}" onclick="playChannel('${c.id}')">
+            <img src="https://images.weserv.nl/?url=${encodeURIComponent(c.img)}&w=70&h=70&fit=cover" class="chan-img" loading="lazy">
+            <div class="chan-name">${c.name}</div>
+        </div>
+    `).join('');
+}
+
+// Search Logic
+searchInput.addEventListener('input', (e) => renderList(e.target.value));
+
+// App start
 window.onload = () => {
     renderList();
-    if (channels.length > 0) {
-        playChannel(channels[0].id);
-    }
-    resetIdleTimer();
+    if (channels.length > 0) playChannel(channels[0].id);
 };
-
-// Ensure logo stays below sidebar (z-index already set in CSS)
-// Clean up on page unload
-window.addEventListener('beforeunload', () => {
-    if (hls) {
-        hls.destroy();
-    }
-});
