@@ -8,57 +8,57 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
-<body class="ui-visible"> <!-- ডিফল্টভাবে UI দেখা যাবে -->
+<body class="ui-visible">
 
-    <div class="video-container" id="mainContainer">
-        <video id="videoPlayer" playsinline></video>
+    <!-- ভিডিও প্লেয়ার কন্টেইনার -->
+    <div class="video-container" id="videoContainer">
+        <video id="videoPlayer" playsinline crossorigin="anonymous"></video>
         
-        <!-- লোডিং স্ক্রিন -->
+        <!-- স্মার্ট লোডিং স্ক্রিন -->
         <div id="loadingMessage" class="loading-overlay">
             <div class="loader-content">
                 <div class="spinner"></div>
-                <p id="loadingText">চ্যানেল তৈরি হচ্ছে...</p>
+                <p id="loadingText">ভিডিও তৈরি হচ্ছে...</p>
             </div>
         </div>
     </div>
 
-    <!-- চ্যানেল সাইডবার -->
-    <div id="channelList" class="channel-sidebar">
-        <div class="sidebar-header">
-            <div class="brand">
-                <i class="fas fa-bolt"></i>
-                <span>RYVOX TV</span>
+    <!-- UI WRAPPER: এই অংশটিই অটোমেটিক হাইড বা শো হবে -->
+    <div id="uiWrapper">
+        
+        <!-- ব্র্যান্ড লোগো -->
+        <div class="ryvox-logo">
+            <div class="logo-wrapper">
+                <span class="main-txt">RYVOX</span>
+                <span class="sub-txt">Tb</span>
+                <div class="line-anim"></div>
             </div>
-            <input type="text" id="searchInput" class="search-input" placeholder="চ্যানেল খুঁজুন...">
         </div>
-        <div id="channelsContainer" class="channels-grid"></div>
-        <div class="sidebar-close" id="closeListBtn">
-            <i class="fas fa-times"></i>
-        </div>
-    </div>
 
-    <!-- কন্ট্রোল প্যানেল (ভলিউম ও ফুলস্ক্রিন) -->
-    <div id="controls" class="player-controls">
-        <div class="control-group">
-            <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="slider">
-            <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
+        <!-- চ্যানেল সাইডবার -->
+        <div id="channelList" class="channel-sidebar">
+            <div class="sidebar-header">
+                <div class="brand"><i class="fas fa-tv"></i> RYVOX LIVE</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="চ্যানেল খুঁজুন...">
+            </div>
+            <div id="channelsContainer" class="channels-grid"></div>
         </div>
-    </div>
 
-    <!-- মোবাইল মেনু বাটন -->
-    <button id="toggleListBtn" class="mobile-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- ব্র্যান্ড লোগো -->
-    <div id="logo" class="ryvox-logo">
-        <div class="logo-wrapper">
-            <span class="main-txt">RYVOX</span>
-            <span class="sub-txt">Tb</span>
-            <div class="line-anim"></div>
+        <!-- প্লেয়ার কন্ট্রোলস (ভলিউম ও ফুলস্ক্রিন) -->
+        <div class="player-controls">
+            <div class="control-group">
+                <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="slider">
+                <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
+            </div>
         </div>
-    </div>
+
+        <!-- মোবাইল মেনু টগল বাটন -->
+        <button id="toggleListBtn" class="mobile-toggle">
+            <i class="fas fa-list-ul"></i>
+        </button>
+
+    </div> <!-- UI WRAPPER END -->
 
     <script src="script.js"></script>
 </body>
