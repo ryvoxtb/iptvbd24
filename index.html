@@ -2,62 +2,57 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX Tb - Premium IPTV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>RYVOX Tb | Premium IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body class="ui-visible">
 
-    <!-- ভিডিও প্লেয়ার (পুরো স্ক্রিন জুড়ে) -->
+    <!-- VIDEO CONTAINER - Fullscreen immersive -->
     <div class="video-container">
-        <video id="videoPlayer" playsinline crossorigin="anonymous"></video>
-        
-        <!-- প্রিমিয়াম লোডিং এনিমেশন -->
+        <video id="videoPlayer" playsinline crossorigin="anonymous" preload="auto"></video>
         <div id="loadingMessage" class="loading-overlay">
             <div class="loader-box">
                 <div class="glow-spinner"></div>
-                <p id="loadingText">প্যানেল তৈরি হচ্ছে...</p>
+                <p id="loadingText">📡 স্ট্রিম লোড হচ্ছে...</p>
             </div>
         </div>
     </div>
 
-    <!-- ব্র্যান্ড লোগো (এটি কখনোই হাইড হবে না) -->
-    <div class="ryvox-logo" id="permanentLogo">
-        <div class="logo-wrapper">
-            <span class="main-txt">RYVOX</span>
-            <span class="sub-txt">Tb</span>
-            <div class="line-glow"></div>
-        </div>
-    </div>
-
-    <!-- UI WRAPPER (চ্যানেল লিস্ট এবং কন্ট্রোল যা হাইড হবে) -->
+    <!-- UI WRAPPER (Auto-hide: Channel Sidebar + Controls) -->
     <div id="uiWrapper">
-        
-        <!-- চ্যানেল সাইডবার -->
+        <!-- Channel Sidebar - Premium Glassmorph -->
         <div id="channelList" class="channel-sidebar">
             <div class="sidebar-header">
-                <div class="brand"><i class="fas fa-bolt"></i> LIVE STREAM</div>
-                <input type="text" id="searchInput" class="search-input" placeholder="চ্যানেল খুঁজুন...">
+                <div class="brand"><i class="fas fa-tv"></i> চ্যানেল তালিকা</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 চ্যানেল খুঁজুন...">
             </div>
             <div id="channelsContainer" class="channels-grid"></div>
         </div>
 
-        <!-- প্লেয়ার কন্ট্রোলস -->
+        <!-- Player Controls - Sleek Glass Panel -->
         <div class="player-controls">
             <div class="control-group">
                 <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="slider">
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" class="slider">
                 <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
             </div>
         </div>
 
-        <!-- মোবাইল মেনু টগল -->
+        <!-- Mobile Toggle Button -->
         <button id="toggleListBtn" class="mobile-toggle">
-            <i class="fas fa-list"></i>
+            <i class="fas fa-list-ul"></i>
         </button>
+    </div>
 
+    <!-- LOGO: Pure text with light sweep animation, positioned below channel list -->
+    <div class="logo-container">
+        <div class="ryvox-logo">
+            <span class="logo-text">RYVOX</span>
+            <span class="logo-sub">Tb</span>
+        </div>
     </div>
 
     <script src="script.js"></script>
