@@ -8,25 +8,29 @@ const channels = [
     { id: '86', name: 'PEACE TV BANGLA', img: 'http://103.144.89.251/assets/images/PEACE TV BANGLA1745044480.png' }
 ];
 
-const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
+const WORKER_URL = "https://abdullah965-iptv.hf.space";
 
-// ==================== OPTIMIZED HLS CONFIG ====================
+// ==================== HIGH-PERFORMANCE HLS CONFIG ====================
 const hlsConfig = {
     enableWorker: true,
-    lowLatencyMode: false,           // বাফারিং কমাতে এটা false রাখা ভালো
-    backBufferLength: 60,            // পিছনে ৬০ সেকেন্ড বাফার ধরে রাখবে
-    maxBufferLength: 30,             // বাফার ৩০ সেকেন্ড করা হলো যাতে নেট স্লো হলেও ভিডিও না আটকায়
-    maxMaxBufferLength: 60,
-    maxBufferSize: 60 * 1000 * 1000, // ৬০ এমবি বাফার
-    startLevel: -1,                  // অটো কোয়ালিটি
-    abandonFragmentOnMetadataError: true,
-    fragLoadingTimeOut: 20000,       // ২০ সেকেন্ড টাইমআউট
-    manifestLoadingTimeOut: 20000,
-    levelLoadingTimeOut: 20000,
-    // রিট্রাই পলিসি
-    manifestLoadingMaxRetry: 5,
-    levelLoadingMaxRetry: 5,
-    fragLoadingMaxRetry: 5
+    autoStartLoad: true,
+    startFragPrefetch: true,         // প্রথম থেকেই ডাটা টানা শুরু করবে
+    progressive: true,               // দ্রুত প্লেব্যাক শুরু করবে
+    lowLatencyMode: false,           // স্ট্যাবিলিটির জন্য এবং অডিও সিঙ্কের জন্য false রাখা ভালো
+    
+    // বাফার সেটিংস (লোডিং কমাতে মাঝারি মানের বাফার)
+    maxBufferLength: 15,             
+    maxMaxBufferLength: 30,
+    maxBufferSize: 50 * 1000 * 1000, 
+    
+    // অডিও/ভিডিও সিঙ্ক অপ্টিমাইজেশন
+    enableAudioTrackSwitching: true,
+    forceKeyFrameOnDiscontinuity: true,
+    
+    // কানেকশন রিট্রাই পলিসি
+    manifestLoadingMaxRetry: 8,
+    manifestLoadingRetryDelay: 1000,
+    fragLoadingMaxRetry: 10
 };
 
 // ==================== DOM ELEMENTS ====================
@@ -40,13 +44,16 @@ const fullscreenBtn = document.getElementById('fullscreenBtn');
 
 let hls = null;
 let currentChanId = null;
-let idleTimer = null;
 
 // ==================== STREAMING ENGINE ====================
 async function playChannel(id) {
     if (currentChanId === id && hls) return;
     currentChanId = id;
     renderList(searchInput.value);
+    
+    // সাউন্ড এনাবল নিশ্চিত করা
+    video.muted = false; 
+    video.volume = volumeSlider.value;
     
     loader.classList.add('active'); 
     
@@ -55,20 +62,15 @@ async function playChannel(id) {
         const data = await response.json();
         
         if (data.success && data.url) {
-            // প্রক্সি ছাড়া সরাসরি ট্রাই করুন যদি সম্ভব হয়, প্রক্সি ভিডিও স্লো করে দেয়
-            // যদি CORS এরর দেয় তবেই প্রক্সি ব্যবহার করবেন
-            const streamUrl = data.url.includes('m3u8') 
-                ? `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}` 
-                : data.url;
-                
+            // প্রক্সি ইউআরএল তৈরি
+            const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
             initPlayer(streamUrl);
         } else {
-            throw new Error("API Error");
+            throw new Error("API stream url not found");
         }
     } catch (error) {
-        console.error("Stream Error:", error);
-        // ২ সেকেন্ড পর আবার চেষ্টা না করে ইউজারকে মেসেজ দেখানো ভালো
-        // setTimeout(() => playChannel(id), 2000); 
+        console.error("Playback Error:", error);
+        loader.classList.remove('active');
     }
 }
 
@@ -83,41 +85,44 @@ function initPlayer(url) {
         hls.attachMedia(video);
         
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {
+            // ইউজার ইন্টারঅ্যাকশনের পর প্লে করলে অডিও সমস্যা হবে না
+            video.play().catch(err => {
+                console.log("Autoplay blocked. User must click to hear sound.");
+                // যদি ব্রাউজার ব্লক করে তবেই কেবল মিউট করে প্লে করবে
                 video.muted = true;
                 video.play();
             });
         });
 
-        // স্মার্ট এরর রিকভারি
+        // এরর হ্যান্ডলিং ও অটো রিকভারি
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 switch (data.type) {
                     case Hls.ErrorTypes.NETWORK_ERROR:
-                        console.log("Network error, retrying...");
                         hls.startLoad();
                         break;
                     case Hls.ErrorTypes.MEDIA_ERROR:
-                        console.log("Media error, recovering...");
                         hls.recoverMediaError();
                         break;
                     default:
-                        console.log("Unrecoverable error, reloading source...");
                         initPlayer(url);
                         break;
                 }
             }
         });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari বা iOS এর জন্য
         video.src = url;
         video.addEventListener('loadedmetadata', () => video.play());
     }
 }
 
-// UI & Logic
+// লোডার কন্ট্রোল
 video.addEventListener('waiting', () => loader.classList.add('active'));
 video.addEventListener('playing', () => loader.classList.remove('active'));
+video.addEventListener('canplay', () => loader.classList.remove('active'));
 
+// ==================== UI RENDERING ====================
 function renderList(filter = "") {
     const filtered = channels.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
     container.innerHTML = filtered.map(c => `
@@ -128,25 +133,42 @@ function renderList(filter = "") {
     `).join('');
 }
 
-// Volume & UI Controls (বাকি আগের কোড ঠিক আছে)
+// ভলিউম কন্ট্রোল
 volumeSlider.addEventListener('input', (e) => {
     video.volume = e.target.value;
+    video.muted = (video.volume === 0);
+    updateVolumeIcon();
+});
+
+volumeBtn.addEventListener('click', () => {
+    video.muted = !video.muted;
     updateVolumeIcon();
 });
 
 function updateVolumeIcon() {
-    if (video.volume === 0) volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-    else volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+    if (video.muted || video.volume === 0) {
+        volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    } else {
+        volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+    }
 }
 
+// ফুলস্ক্রিন কন্ট্রোল
 fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
 });
 
+// সার্চ লজিক
 searchInput.addEventListener('input', (e) => renderList(e.target.value));
 
+// অ্যাপ শুরু
 window.onload = () => {
     renderList();
-    if (channels.length > 0) playChannel(channels[0].id);
+    // প্রথমবার প্লে করার সময় ইউজারকে স্ক্রিনে একবার ক্লিক করতে উৎসাহিত করা হয়
+    // যাতে সাউন্ড ব্লক না হয়
+    console.log("Ready to play with sound.");
 };
