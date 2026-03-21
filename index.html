@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX Tb - Full Screen IPTV Player</title>
+    <title>RYVOX Tb - Premium IPTV Player</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -13,7 +13,14 @@
     <!-- Full Screen Video Container -->
     <div class="video-container">
         <video id="videoPlayer" playsinline></video>
-        <div id="loader" class="loader"></div>
+        
+        <!-- Loading Message -->
+        <div id="loadingMessage" class="loading-message">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p id="loadingText">Loading channel...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Channel List - Left Side -->
@@ -49,10 +56,13 @@
         <i class="fas fa-list-ul"></i>
     </button>
 
-    <!-- Current Channel Info -->
-    <div class="channel-info-bar" id="channelInfoBar">
-        <span id="currentChannelName">Loading channels...</span>
-        <span class="live-badge">● LIVE</span>
+    <!-- Company Logo with Animation -->
+    <div class="company-logo">
+        <div class="logo-text">
+            <span class="logo-main">RYVOX</span>
+            <span class="logo-sub">Tb</span>
+        </div>
+        <div class="logo-animation"></div>
     </div>
 
     <script src="script.js"></script>
