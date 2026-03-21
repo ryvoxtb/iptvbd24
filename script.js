@@ -1,6 +1,5 @@
 // ==================== CHANNEL DATABASE ====================
 const channels = [
-    // Sports
     { id: '88', name: 'A SPORTS HD', img: 'http://103.144.89.251/assets/images/A SPORTS HD1745044782.png' },
     { id: '40', name: 'EUROSPORTS HD', img: 'http://103.144.89.251/assets/images/EUROSPORTS HD1745040406.png' },
     { id: '87', name: 'FAST SPORTS HD', img: 'http://103.144.89.251/assets/images/FAST SPORTS HD1745044750.png' },
@@ -19,8 +18,6 @@ const channels = [
     { id: '31', name: 'STAR SPORTS 3', img: 'http://103.144.89.251/assets/images/STAR SPORTS 31745039893.png' },
     { id: '16', name: 'STAR SPORTS SELECT 2 HD', img: 'http://103.144.89.251/assets/images/STAR SPORTS SELECT 2 HD1745033722.png' },
     { id: '1', name: 'T SPORTS', img: 'http://103.144.89.251/assets/images/T SPORTS1744972630.png' },
-    
-    // English
     { id: '85', name: 'ALJAZEERA HD', img: 'http://103.144.89.251/assets/images/ALJAZEETA HD1745044358.png' },
     { id: '35', name: 'AND FLIX HD', img: 'http://103.144.89.251/assets/images/AND FLIX HD1745040018.png' },
     { id: '41', name: 'AND PRIVE HD', img: 'http://103.144.89.251/assets/images/AND PRIVE HD1745040451.png' },
@@ -48,8 +45,6 @@ const channels = [
     { id: '9', name: 'TLC HD', img: 'http://103.144.89.251/assets/images/TLC HD1745033484.png' },
     { id: '62', name: 'TRAVEL XP', img: 'http://103.144.89.251/assets/images/TRAVEL XP1745043118.png' },
     { id: '37', name: 'ZEE CAFE HD', img: 'http://103.144.89.251/assets/images/ZEE CAFE HD1745040102.png' },
-    
-    // Hindi
     { id: '5', name: 'AND PICTURES HD', img: 'http://103.144.89.251/assets/images/AND PICTURS HD1745031440.png' },
     { id: '10', name: 'COLORS CINEPLEX HD', img: 'http://103.144.89.251/assets/images/COLORS CINEPLEX HD1745033519.png' },
     { id: '4', name: 'COLORS HD', img: 'http://103.144.89.251/assets/images/COLORS HD1745031404.png' },
@@ -66,8 +61,6 @@ const channels = [
     { id: '7', name: 'ZEE TV HD', img: 'http://103.144.89.251/assets/images/ZEE TV HD1745033383.png' },
     { id: '53', name: 'ZING', img: 'http://103.144.89.251/assets/images/ZING1745042718.png' },
     { id: '42', name: 'ZOOM', img: 'http://103.144.89.251/assets/images/ZOOM1745040961.png' },
-    
-    // Bangla
     { id: '80', name: 'ATN BANGLA', img: 'http://103.144.89.251/assets/images/ATN BANGLA1745044183.png' },
     { id: '95', name: 'ATN NEWS', img: 'http://103.144.89.251/assets/images/ATN NEWS1745045113.png' },
     { id: '82', name: 'CHANNEL 24', img: 'http://103.144.89.251/assets/images/CHANNEL 241745044263.png' },
@@ -87,8 +80,6 @@ const channels = [
     { id: '17', name: 'SUN BANGLA HD', img: 'http://103.144.89.251/assets/images/SUN BANGLA HD1745033791.png' },
     { id: '43', name: 'ZEE BANGLA CINEMA', img: 'http://103.144.89.251/assets/images/ZEE BANGLA CINEMA1745040996.png' },
     { id: '14', name: 'ZEE BANGLA HD', img: 'http://103.144.89.251/assets/images/ZEE BANGLA HD1745033633.png' },
-    
-    // Kids
     { id: '50', name: 'BAL BHARAT', img: 'http://103.144.89.251/assets/images/BAL BHARAT1745041576.png' },
     { id: '8', name: 'CARTOON NETWORK', img: 'http://103.144.89.251/assets/images/CARTOON NETWORK1745033414.png' },
     { id: '68', name: 'DURANTA TV', img: 'http://103.144.89.251/assets/images/DURANTA TV1745043400.png' },
@@ -99,45 +90,48 @@ const channels = [
     { id: '45', name: 'SONIC', img: 'http://103.144.89.251/assets/images/SONIC1745041154.png' },
     { id: '93', name: 'SONY YAY', img: 'http://103.144.89.251/assets/images/SONY YAY1745045046.png' },
     { id: '75', name: 'SUPER HUNGAMA', img: 'http://103.144.89.251/assets/images/SUPER HUNGAMA1745044022.png' },
-    
-    // Islamic
     { id: '83', name: 'MADANI TV HD', img: 'http://103.144.89.251/assets/images/MADANI TV HD1745044303.png' },
     { id: '86', name: 'PEACE TV BANGLA', img: 'http://103.144.89.251/assets/images/PEACE TV BANGLA1745044480.png' }
 ];
 
-// ==================== CONFIGURATION ====================
+// ==================== CONFIGURATION - ULTRA FAST ====================
 const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
-// Optimized HLS Configuration
+// Super Optimized HLS Config - Maximum Speed
 const hlsConfig = {
     enableWorker: true,
     lowLatencyMode: true,
-    maxBufferLength: 20,
-    maxMaxBufferLength: 40,
-    maxBufferSize: 30 * 1000 * 1000,
-    startLevel: -1,
-    fragLoadingMaxRetry: 3,
-    levelLoadingMaxRetry: 3,
-    fragLoadingTimeOut: 8000,
-    levelLoadingTimeOut: 8000,
-    manifestLoadingTimeOut: 8000,
-    startFragPrefetch: true,
+    maxBufferLength: 5,              // Very small buffer for fast start
+    maxMaxBufferLength: 10,          // Max buffer limit
+    maxBufferSize: 10 * 1000 * 1000, // 10MB max buffer
+    startLevel: -1,                  // Auto quality
+    fragLoadingMaxRetry: 1,          // Only 1 retry for speed
+    levelLoadingMaxRetry: 1,
+    fragLoadingTimeOut: 3000,        // 3 second timeout
+    levelLoadingTimeOut: 3000,
+    manifestLoadingTimeOut: 3000,
+    startFragPrefetch: true,         // Prefetch first fragment
     testBandwidth: true,
     autoStartLoad: true,
-    abrEwmaDefaultEstimate: 5e5,
-    abrEwmaFastLive: 3,
-    abrEwmaSlowLive: 9
+    abrEwmaDefaultEstimate: 1e6,
+    abrEwmaFastLive: 1,
+    abrEwmaSlowLive: 3,
+    liveSyncDurationCount: 1,
+    liveMaxLatencyDurationCount: 2,
+    progressive: true,               // Progressive loading
+    nudgeOffset: 0.05,
+    nudgeMaxRetry: 3
 };
 
 // ==================== DOM ELEMENTS ====================
 const video = document.getElementById('videoPlayer');
-const loader = document.getElementById('loader');
+const loadingMessage = document.getElementById('loadingMessage');
+const loadingText = document.getElementById('loadingText');
 const channelListDiv = document.getElementById('channelList');
 const channelsContainer = document.getElementById('channelsContainer');
 const searchInput = document.getElementById('searchInput');
 const toggleListBtn = document.getElementById('toggleListBtn');
 const closeListBtn = document.getElementById('closeListBtn');
-const currentChannelNameSpan = document.getElementById('currentChannelName');
 const volumeSlider = document.getElementById('volumeSlider');
 const volumeBtn = document.getElementById('volumeBtn');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -148,13 +142,23 @@ let currentChannel = null;
 let autoHideTimeout = null;
 let isListVisible = true;
 let lastVolume = 1;
+let pendingLoad = false;
+let preloadTimer = null;
 
-// ==================== FULLSCREEN FUNCTION ====================
+// ==================== LOADING FUNCTIONS ====================
+function showLoading(message = 'Loading channel...') {
+    loadingText.innerText = message;
+    loadingMessage.classList.add('active');
+}
+
+function hideLoading() {
+    loadingMessage.classList.remove('active');
+}
+
+// ==================== FULLSCREEN ====================
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(err => {
-            console.log(`Error attempting fullscreen: ${err.message}`);
-        });
+        document.documentElement.requestFullscreen();
         fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
     } else {
         document.exitFullscreen();
@@ -163,97 +167,112 @@ function toggleFullscreen() {
 }
 
 document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement) {
-        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-    } else {
-        fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-    }
+    fullscreenBtn.innerHTML = document.fullscreenElement ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
 });
 
-// ==================== LOAD CHANNEL ====================
+// ==================== LOAD CHANNEL - FASTEST POSSIBLE ====================
 async function loadChannel(channel) {
+    if (pendingLoad) return;
     if (currentChannel && currentChannel.id === channel.id) return;
     
+    pendingLoad = true;
     currentChannel = channel;
-    currentChannelNameSpan.innerText = channel.name;
-    loader.style.display = 'block';
-
+    
+    // Immediate loading message
+    showLoading(`Loading ${channel.name}...`);
+    
+    // Clear any pending preload
+    if (preloadTimer) clearTimeout(preloadTimer);
+    
     try {
-        const res = await fetch(`${WORKER_URL}/api/get-stream?id=${channel.id}`);
+        // Fast fetch with timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const res = await fetch(`${WORKER_URL}/api/get-stream?id=${channel.id}`, {
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
         const data = await res.json();
 
         if (data.success) {
             const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
             
             if (Hls.isSupported()) {
+                // Destroy existing HLS instance
                 if (hls) {
-                    hls.stopLoad();
-                    hls.detachMedia();
-                    hls.destroy();
+                    try {
+                        hls.stopLoad();
+                        hls.detachMedia();
+                        hls.destroy();
+                    } catch(e) {}
                     hls = null;
                 }
 
+                // Create new HLS instance with fast config
                 hls = new Hls(hlsConfig);
                 hls.loadSource(streamUrl);
                 hls.attachMedia(video);
 
+                // Quick play on manifest parsed
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play().catch(e => console.log('Auto-play:', e));
-                    loader.style.display = 'none';
+                    video.play().catch(e => console.log('Play error:', e));
+                    hideLoading();
+                    pendingLoad = false;
                     
-                    // Auto hide list after 3 seconds of playback
-                    if (isListVisible) {
-                        autoHideTimeout = setTimeout(() => {
-                            if (isListVisible && !video.paused) {
-                                hideChannelList();
-                            }
-                        }, 3000);
-                    }
-                });
-
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log('Network error, retrying...');
-                                setTimeout(() => hls.startLoad(), 1000);
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log('Media error, recovering...');
-                                hls.recoverMediaError();
-                                break;
-                            default:
-                                console.log('Fatal error');
-                                loader.style.display = 'none';
-                                break;
-                        }
-                    }
-                });
-
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = streamUrl;
-                video.addEventListener('loadedmetadata', () => {
-                    video.play();
-                    loader.style.display = 'none';
+                    // Auto hide list
+                    if (isListVisible && autoHideTimeout) clearTimeout(autoHideTimeout);
                     if (isListVisible) {
                         autoHideTimeout = setTimeout(() => {
                             if (isListVisible && !video.paused) hideChannelList();
                         }, 3000);
                     }
                 });
+
+                // Fast error recovery
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                            console.log('Network error, retrying...');
+                            setTimeout(() => hls.startLoad(), 500);
+                        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                            hls.recoverMediaError();
+                        } else {
+                            hideLoading();
+                            pendingLoad = false;
+                            setTimeout(() => loadChannel(channel), 1000);
+                        }
+                    }
+                });
+
+                // Start loading immediately
+                hls.startLoad();
+                
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', () => {
+                    video.play();
+                    hideLoading();
+                    pendingLoad = false;
+                }, { once: true });
             }
         } else {
-            loader.style.display = 'none';
+            hideLoading();
+            pendingLoad = false;
+            setTimeout(() => loadChannel(channel), 1000);
         }
     } catch (e) {
         console.error("Error:", e);
-        loader.style.display = 'none';
+        hideLoading();
+        pendingLoad = false;
+        setTimeout(() => loadChannel(channel), 1000);
     }
     
     renderChannels();
 }
 
-// ==================== CHANNEL LIST FUNCTIONS ====================
+// ==================== CHANNEL LIST ====================
 function showChannelList() {
     channelListDiv.classList.remove('hide');
     isListVisible = true;
@@ -268,11 +287,7 @@ function hideChannelList() {
 }
 
 function toggleChannelList() {
-    if (isListVisible) {
-        hideChannelList();
-    } else {
-        showChannelList();
-    }
+    isListVisible ? hideChannelList() : showChannelList();
 }
 
 // ==================== RENDER CHANNELS ====================
@@ -280,7 +295,6 @@ let searchQuery = '';
 
 function renderChannels() {
     let filtered = channels;
-    
     if (searchQuery) {
         filtered = filtered.filter(ch => 
             ch.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -313,7 +327,7 @@ function searchChannels() {
     renderChannels();
 }
 
-// ==================== VOLUME CONTROL ====================
+// ==================== VOLUME ====================
 function updateVolumeIcon() {
     if (video.muted || video.volume === 0) {
         volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
@@ -347,11 +361,12 @@ function setVolume(value) {
     updateVolumeIcon();
 }
 
-// ==================== VIDEO PLAY/PAUSE ====================
+// ==================== VIDEO CONTROLS ====================
 function togglePlayPause() {
     if (video.paused) {
         video.play();
         if (isListVisible) {
+            if (autoHideTimeout) clearTimeout(autoHideTimeout);
             autoHideTimeout = setTimeout(() => {
                 if (isListVisible && !video.paused) hideChannelList();
             }, 3000);
@@ -363,7 +378,7 @@ function togglePlayPause() {
     }
 }
 
-// ==================== LOAD RANDOM CHANNEL ====================
+// ==================== LOAD RANDOM ====================
 function loadRandomChannel() {
     const randomIndex = Math.floor(Math.random() * channels.length);
     loadChannel(channels[randomIndex]);
@@ -387,12 +402,10 @@ video.addEventListener('pause', () => {
 volumeSlider.addEventListener('input', (e) => setVolume(e.target.value));
 volumeBtn.addEventListener('click', toggleMute);
 fullscreenBtn.addEventListener('click', toggleFullscreen);
-
 searchInput.addEventListener('input', searchChannels);
 toggleListBtn.addEventListener('click', toggleChannelList);
 closeListBtn.addEventListener('click', hideChannelList);
 
-// Close list when clicking outside (mobile)
 document.addEventListener('click', (e) => {
     if (window.innerWidth <= 768 && isListVisible) {
         if (!channelListDiv.contains(e.target) && !toggleListBtn.contains(e.target)) {
@@ -405,24 +418,15 @@ document.addEventListener('click', (e) => {
 function init() {
     renderChannels();
     loadRandomChannel();
-    
     video.volume = 1;
     volumeSlider.value = 1;
     updateVolumeIcon();
-    
-    // Channel list is visible initially (class="active" in HTML)
     isListVisible = true;
     
-    // Auto hide after 5 seconds if video starts playing
     setTimeout(() => {
-        if (!video.paused && isListVisible) {
-            hideChannelList();
-        }
+        if (!video.paused && isListVisible) hideChannelList();
     }, 5000);
 }
 
-// Start the app
 init();
-
-// Make functions global
 window.loadChannel = loadChannel;
