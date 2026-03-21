@@ -10,24 +10,23 @@ const channels = [
 
 const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
-// ==================== ULTRA-FAST HLS CONFIG ====================
-// লোডিং সমস্যা দূর করতে বাফার এবং রিট্রাই পলিসি অপ্টিমাইজ করা হয়েছে
+// ==================== OPTIMIZED HLS CONFIG ====================
 const hlsConfig = {
     enableWorker: true,
-    lowLatencyMode: true,            // ল্যাটেন্সি কমানোর জন্য
-    maxBufferLength: 5,              // বাফার ৫ সেকেন্ডে নামিয়ে আনা হয়েছে যাতে দ্রুত স্টার্ট হয়
-    maxMaxBufferLength: 10,
-    maxBufferSize: 30 * 1000 * 1000, // মেমোরি লোড কমাতে ৩০ এমবি বাফার লিমিট
-    startLevel: -1,                  // অটো বেস্ট কোয়ালিটি
-    testBandwidth: true,
-    progressive: true,               // প্রোগ্রেসিভ ডাউনলোডিং
-    startFragPrefetch: true,         // প্রথম ফ্র্যাগমেন্ট আগেভাগেই লোড করবে
-    
-    // রিট্রাই পলিসি: নেটওয়ার্ক দুর্বল হলেও কানেকশন ধরে রাখবে
-    manifestLoadingMaxRetry: 10,
-    manifestLoadingRetryDelay: 500,
-    levelLoadingMaxRetry: 10,
-    fragLoadingMaxRetry: 10
+    lowLatencyMode: false,           // বাফারিং কমাতে এটা false রাখা ভালো
+    backBufferLength: 60,            // পিছনে ৬০ সেকেন্ড বাফার ধরে রাখবে
+    maxBufferLength: 30,             // বাফার ৩০ সেকেন্ড করা হলো যাতে নেট স্লো হলেও ভিডিও না আটকায়
+    maxMaxBufferLength: 60,
+    maxBufferSize: 60 * 1000 * 1000, // ৬০ এমবি বাফার
+    startLevel: -1,                  // অটো কোয়ালিটি
+    abandonFragmentOnMetadataError: true,
+    fragLoadingTimeOut: 20000,       // ২০ সেকেন্ড টাইমআউট
+    manifestLoadingTimeOut: 20000,
+    levelLoadingTimeOut: 20000,
+    // রিট্রাই পলিসি
+    manifestLoadingMaxRetry: 5,
+    levelLoadingMaxRetry: 5,
+    fragLoadingMaxRetry: 5
 };
 
 // ==================== DOM ELEMENTS ====================
@@ -38,93 +37,45 @@ const searchInput = document.getElementById('searchInput');
 const volumeSlider = document.getElementById('volumeSlider');
 const volumeBtn = document.getElementById('volumeBtn');
 const fullscreenBtn = document.getElementById('fullscreenBtn');
-const toggleListBtn = document.getElementById('toggleListBtn');
-const channelSidebar = document.getElementById('channelList');
 
-// ==================== GLOBAL VARIABLES ====================
 let hls = null;
 let currentChanId = null;
 let idleTimer = null;
-let isMuted = false;
-let sidebarMobileVisible = true;
 
-// ==================== PLAYBACK & UI CONTROLS ====================
-function togglePlayPause() {
-    if (video.paused) {
-        video.play().catch(e => console.log("Play failed:", e));
-    } else {
-        video.pause();
-    }
-    showUIAndReset();
-}
-
-video.addEventListener('click', (e) => { e.stopPropagation(); togglePlayPause(); });
-
-function showUIAndReset() {
-    document.body.classList.remove('ui-hidden');
-    resetIdleTimer();
-}
-
-function resetIdleTimer() {
-    if (idleTimer) clearTimeout(idleTimer);
-    if (!video.paused) {
-        idleTimer = setTimeout(() => {
-            document.body.classList.add('ui-hidden');
-        }, 4000); // ৪ সেকেন্ড পর UI হাইড হবে
-    }
-}
-
-// Activity events
-['mousemove', 'touchstart', 'keydown'].forEach(evt => 
-    window.addEventListener(evt, showUIAndReset)
-);
-
-// Volume logic
-volumeSlider.addEventListener('input', (e) => {
-    video.volume = e.target.value;
-    isMuted = (video.volume === 0);
-    updateVolumeIcon();
-});
-
-function updateVolumeIcon() {
-    if (video.volume === 0 || isMuted) volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-    else if (video.volume < 0.5) volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
-    else volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-}
-
-// Fullscreen logic
-fullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
-});
-
-// ==================== STREAMING ENGINE (CRITICAL) ====================
+// ==================== STREAMING ENGINE ====================
 async function playChannel(id) {
     if (currentChanId === id && hls) return;
     currentChanId = id;
     renderList(searchInput.value);
     
-    loader.classList.add('active'); // লোডার দেখানো
+    loader.classList.add('active'); 
     
     try {
         const response = await fetch(`${WORKER_URL}/api/get-stream?id=${id}`);
         const data = await response.json();
         
         if (data.success && data.url) {
-            // প্রক্সি ইউআরএল ব্যবহার করে CORS সমস্যা এড়ানো
-            const streamUrl = `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}`;
+            // প্রক্সি ছাড়া সরাসরি ট্রাই করুন যদি সম্ভব হয়, প্রক্সি ভিডিও স্লো করে দেয়
+            // যদি CORS এরর দেয় তবেই প্রক্সি ব্যবহার করবেন
+            const streamUrl = data.url.includes('m3u8') 
+                ? `${WORKER_URL}/api/proxy?url=${encodeURIComponent(data.url)}` 
+                : data.url;
+                
             initPlayer(streamUrl);
         } else {
             throw new Error("API Error");
         }
     } catch (error) {
-        console.error("Retrying channel...", error);
-        setTimeout(() => playChannel(id), 2000);
+        console.error("Stream Error:", error);
+        // ২ সেকেন্ড পর আবার চেষ্টা না করে ইউজারকে মেসেজ দেখানো ভালো
+        // setTimeout(() => playChannel(id), 2000); 
     }
 }
 
 function initPlayer(url) {
-    if (hls) hls.destroy();
+    if (hls) {
+        hls.destroy();
+    }
     
     if (Hls.isSupported()) {
         hls = new Hls(hlsConfig);
@@ -133,37 +84,42 @@ function initPlayer(url) {
         
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
             video.play().catch(() => {
-                // ব্রাউজার অটো-প্লে ব্লক করলে মিউট করে ট্রাই করবে
                 video.muted = true;
                 video.play();
             });
         });
 
-        // এরর হ্যান্ডলিং যাতে ভিডিও আটকে না যায়
+        // স্মার্ট এরর রিকভারি
         hls.on(Hls.Events.ERROR, (event, data) => {
             if (data.fatal) {
                 switch (data.type) {
-                    case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
-                    case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
-                    default: initPlayer(url); break;
+                    case Hls.ErrorTypes.NETWORK_ERROR:
+                        console.log("Network error, retrying...");
+                        hls.startLoad();
+                        break;
+                    case Hls.ErrorTypes.MEDIA_ERROR:
+                        console.log("Media error, recovering...");
+                        hls.recoverMediaError();
+                        break;
+                    default:
+                        console.log("Unrecoverable error, reloading source...");
+                        initPlayer(url);
+                        break;
                 }
             }
         });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // For Safari/iOS
         video.src = url;
+        video.addEventListener('loadedmetadata', () => video.play());
     }
 }
 
-// লোডার কন্ট্রোল
+// UI & Logic
 video.addEventListener('waiting', () => loader.classList.add('active'));
 video.addEventListener('playing', () => loader.classList.remove('active'));
-video.addEventListener('canplay', () => loader.classList.remove('active'));
 
-// ==================== UI RENDERING ====================
 function renderList(filter = "") {
     const filtered = channels.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
-    
     container.innerHTML = filtered.map(c => `
         <div class="channel-card ${currentChanId === c.id ? 'active' : ''}" onclick="playChannel('${c.id}')">
             <img src="https://images.weserv.nl/?url=${encodeURIComponent(c.img)}&w=70&h=70&fit=cover" class="chan-img" loading="lazy">
@@ -172,10 +128,24 @@ function renderList(filter = "") {
     `).join('');
 }
 
-// Search Logic
+// Volume & UI Controls (বাকি আগের কোড ঠিক আছে)
+volumeSlider.addEventListener('input', (e) => {
+    video.volume = e.target.value;
+    updateVolumeIcon();
+});
+
+function updateVolumeIcon() {
+    if (video.volume === 0) volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+    else volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+}
+
+fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+});
+
 searchInput.addEventListener('input', (e) => renderList(e.target.value));
 
-// App start
 window.onload = () => {
     renderList();
     if (channels.length > 0) playChannel(channels[0].id);
