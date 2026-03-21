@@ -3,66 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX Tb - Premium IPTV Player</title>
+    <title>RYVOX Tb - Ultra Fast IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- HLS.js লাইব্রেরি (ভিডিও দ্রুত লোড করার জন্য) -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
-    <!-- Full Screen Video Container -->
+    <!-- ভিডিও কন্টেইনার -->
     <div class="video-container">
-        <video id="videoPlayer" playsinline></video>
+        <video id="videoPlayer" playsinline crossorigin="anonymous"></video>
         
-        <!-- Loading Message -->
-        <div id="loadingMessage" class="loading-message">
-            <div class="loading-content">
-                <div class="loading-spinner"></div>
-                <p id="loadingText">Loading channel...</p>
+        <!-- স্মার্ট লোডিং স্ক্রিন -->
+        <div id="loadingMessage" class="loading-overlay">
+            <div class="loader-content">
+                <div class="spinner"></div>
+                <p id="loadingText">প্যানেল তৈরি হচ্ছে...</p>
             </div>
         </div>
     </div>
 
-    <!-- Channel List - Left Side -->
-    <div id="channelList" class="channel-list active">
-        <div class="channel-header">
-            <h2>
-                <i class="fas fa-tv"></i>
-                TV CHANNELS
-            </h2>
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search channel...">
+    <!-- চ্যানেল সাইডবার -->
+    <div id="channelList" class="channel-sidebar">
+        <div class="sidebar-header">
+            <div class="brand">
+                <i class="fas fa-bolt"></i>
+                <span>LIVE TV</span>
+            </div>
+            <input type="text" id="searchInput" class="search-input" placeholder="চ্যানেল খুঁজুন...">
         </div>
-        <div id="channelsContainer"></div>
-        <div class="close-list" id="closeListBtn">
-            <i class="fas fa-times"></i>
+        
+        <div id="channelsContainer" class="channels-grid">
+            <!-- জাভাস্ক্রিপ্ট দিয়ে এখানে চ্যানেল আসবে -->
+        </div>
+
+        <div class="sidebar-close" id="closeListBtn">
+            <i class="fas fa-chevron-left"></i>
         </div>
     </div>
 
-    <!-- Control Panel -->
-    <div id="controlPanel" class="control-panel">
-        <div class="control-buttons">
-            <button id="volumeBtn" class="control-btn">
-                <i class="fas fa-volume-up"></i>
-            </button>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="volume-slider">
-            <button id="fullscreenBtn" class="control-btn">
-                <i class="fas fa-expand"></i>
-            </button>
+    <!-- কন্ট্রোল প্যানেল -->
+    <div class="player-controls">
+        <div class="control-group">
+            <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="slider">
+            <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
         </div>
     </div>
 
-    <!-- Toggle Button for Mobile -->
-    <button id="toggleListBtn" class="toggle-list-btn">
+    <!-- মোবাইল টগল বাটন -->
+    <button id="toggleListBtn" class="mobile-toggle">
         <i class="fas fa-list-ul"></i>
     </button>
 
-    <!-- Company Logo with Animation -->
-    <div class="company-logo">
-        <div class="logo-text">
-            <span class="logo-main">RYVOX</span>
-            <span class="logo-sub">Tb</span>
+    <!-- ব্র্যান্ড লোগো -->
+    <div class="ryvox-logo">
+        <div class="logo-wrapper">
+            <span class="main-txt">RYVOX</span>
+            <span class="sub-txt">Tb</span>
+            <div class="line-anim"></div>
         </div>
-        <div class="logo-animation"></div>
     </div>
 
     <script src="script.js"></script>
