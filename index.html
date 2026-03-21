@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX Tb - Full Screen IPTV</title>
+    <title>RYVOX Tb - Full Screen IPTV Player</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Channel List - Left Side -->
-    <div id="channelList" class="channel-list">
+    <div id="channelList" class="channel-list active">
         <div class="channel-header">
             <h2>
                 <i class="fas fa-tv"></i>
@@ -31,12 +31,17 @@
         </div>
     </div>
 
-    <!-- Volume Control - Will show/hide with channel list -->
-    <div id="volumeControl" class="volume-control">
-        <button id="volumeBtn" class="volume-btn">
-            <i class="fas fa-volume-up"></i>
-        </button>
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="volume-slider">
+    <!-- Control Panel -->
+    <div id="controlPanel" class="control-panel">
+        <div class="control-buttons">
+            <button id="volumeBtn" class="control-btn">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="volume-slider">
+            <button id="fullscreenBtn" class="control-btn">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Toggle Button for Mobile -->
@@ -46,7 +51,7 @@
 
     <!-- Current Channel Info -->
     <div class="channel-info-bar" id="channelInfoBar">
-        <span id="currentChannelName">Select Channel</span>
+        <span id="currentChannelName">Loading channels...</span>
         <span class="live-badge">● LIVE</span>
     </div>
 
