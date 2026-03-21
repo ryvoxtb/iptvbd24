@@ -2,7 +2,7 @@ const video = document.getElementById('videoPlayer');
 const playBtn = document.getElementById('playBtn');
 const miniLoader = document.getElementById('miniLoader');
 const volumeSlider = document.getElementById('volumeSlider');
-const WORKER_URL = "https://abdullah965-iptv.hf.space";
+const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
 let hls = null;
 let currentChannelId = null;
