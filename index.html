@@ -3,23 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX Tb - Ultra Fast IPTV</title>
+    <title>RYVOX Tb - Premium IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- HLS.js লাইব্রেরি (ভিডিও দ্রুত লোড করার জন্য) -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
-<body>
+<body class="ui-visible"> <!-- ডিফল্টভাবে UI দেখা যাবে -->
 
-    <!-- ভিডিও কন্টেইনার -->
-    <div class="video-container">
-        <video id="videoPlayer" playsinline crossorigin="anonymous"></video>
+    <div class="video-container" id="mainContainer">
+        <video id="videoPlayer" playsinline></video>
         
-        <!-- স্মার্ট লোডিং স্ক্রিন -->
+        <!-- লোডিং স্ক্রিন -->
         <div id="loadingMessage" class="loading-overlay">
             <div class="loader-content">
                 <div class="spinner"></div>
-                <p id="loadingText">প্যানেল তৈরি হচ্ছে...</p>
+                <p id="loadingText">চ্যানেল তৈরি হচ্ছে...</p>
             </div>
         </div>
     </div>
@@ -29,22 +27,18 @@
         <div class="sidebar-header">
             <div class="brand">
                 <i class="fas fa-bolt"></i>
-                <span>LIVE TV</span>
+                <span>RYVOX TV</span>
             </div>
             <input type="text" id="searchInput" class="search-input" placeholder="চ্যানেল খুঁজুন...">
         </div>
-        
-        <div id="channelsContainer" class="channels-grid">
-            <!-- জাভাস্ক্রিপ্ট দিয়ে এখানে চ্যানেল আসবে -->
-        </div>
-
+        <div id="channelsContainer" class="channels-grid"></div>
         <div class="sidebar-close" id="closeListBtn">
-            <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-times"></i>
         </div>
     </div>
 
-    <!-- কন্ট্রোল প্যানেল -->
-    <div class="player-controls">
+    <!-- কন্ট্রোল প্যানেল (ভলিউম ও ফুলস্ক্রিন) -->
+    <div id="controls" class="player-controls">
         <div class="control-group">
             <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
             <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="slider">
@@ -52,13 +46,13 @@
         </div>
     </div>
 
-    <!-- মোবাইল টগল বাটন -->
+    <!-- মোবাইল মেনু বাটন -->
     <button id="toggleListBtn" class="mobile-toggle">
-        <i class="fas fa-list-ul"></i>
+        <i class="fas fa-bars"></i>
     </button>
 
     <!-- ব্র্যান্ড লোগো -->
-    <div class="ryvox-logo">
+    <div id="logo" class="ryvox-logo">
         <div class="logo-wrapper">
             <span class="main-txt">RYVOX</span>
             <span class="sub-txt">Tb</span>
