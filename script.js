@@ -1,4 +1,4 @@
-// ==================== চ্যানেল ডাটাবেস ====================
+// ==================== চ্যানেল ডাটা ====================
 const channels = [
     { id: '88', name: 'A SPORTS HD', img: 'http://103.144.89.251/assets/images/A SPORTS HD1745044782.png' },
     { id: '40', name: 'EUROSPORTS HD', img: 'http://103.144.89.251/assets/images/EUROSPORTS HD1745040406.png' },   
@@ -10,12 +10,12 @@ const channels = [
 
 const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
-// HLS কনফিগারেশন (দ্রুত লোড হওয়ার জন্য)
+// HLS অপ্টিমাইজড কনফিগ (ভিডিও ফাস্ট লোড করার জন্য)
 const hlsConfig = {
     enableWorker: true,
     lowLatencyMode: true,
-    maxBufferLength: 8,
-    maxMaxBufferLength: 12,
+    maxBufferLength: 6,      // ছোট বাফার = দ্রুত স্টার্ট
+    maxMaxBufferLength: 10,
     startLevel: -1,
     testBandwidth: true
 };
@@ -23,55 +23,56 @@ const hlsConfig = {
 // DOM এলিমেন্টস
 const video = document.getElementById('videoPlayer');
 const loader = document.getElementById('loadingMessage');
-const loaderTxt = document.getElementById('loadingText');
 const container = document.getElementById('channelsContainer');
 const searchInput = document.getElementById('searchInput');
 
 let hls = null;
 let currentChanId = null;
-let uiTimer = null;
+let idleTimer = null; // অটো-হাইড টাইমার
 
-// ==================== অটো হাইড ফাংশন (প্রধান অংশ) ====================
+// ==================== অটো হাইড লজিক (মূল অংশ) ====================
 
+// UI দেখানোর ফাংশন
 function showUI() {
     document.body.classList.remove('ui-hidden');
-    document.body.classList.add('ui-visible');
-    resetUITimer();
+    resetIdleTimer(); // ইউজার একটিভ হলে টাইমার রিসেট হবে
 }
 
+// UI লুকানোর ফাংশন
 function hideUI() {
-    // ভিডিও যদি প্লে অবস্থায় থাকে তবেই হাইড হবে
+    // ভিডিও যদি প্লে হয় তবেই হাইড হবে, পজ থাকলে হবে না
     if (!video.paused) {
-        document.body.classList.remove('ui-visible');
         document.body.classList.add('ui-hidden');
     }
 }
 
-function resetUITimer() {
-    if (uiTimer) clearTimeout(uiTimer);
+// টাইমার রিসেট করা (৩ সেকেন্ড ইন-এক্টিভ থাকলে হাইড হবে)
+function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
     if (!video.paused) {
-        uiTimer = setTimeout(hideUI, 5000); // ৫ সেকেন্ড পর হাইড হবে
+        idleTimer = setTimeout(hideUI, 4000); // ৪ সেকেন্ড পর হাইড হবে
     }
 }
 
-// স্ক্রিনে মাউস নাড়ালে বা টাচ করলে UI শো করবে
+// ইভেন্ট লিসেনার: মাউস নাড়ালে বা স্ক্রিনে টাচ করলে UI ফিরে আসবে
 window.addEventListener('mousemove', showUI);
+window.addEventListener('mousedown', showUI);
 window.addEventListener('touchstart', showUI);
-video.addEventListener('play', resetUITimer);
-video.addEventListener('pause', showUI); // ভিডিও থামলে UI সব সময় দেখা যাবে
+window.addEventListener('keypress', showUI);
 
-// ==================== ভিডিও প্লেয়ার ফাংশনস ====================
+// ভিডিও প্লে/পজ হলেও UI কন্ট্রোল হবে
+video.addEventListener('play', resetIdleTimer);
+video.addEventListener('pause', showUI);
+
+// ==================== ভিডিও প্লেয়ার ফাংশনস ====================
 
 async function playChannel(id) {
     if (currentChanId === id) return;
     currentChanId = id;
     
-    renderList(); // UI আপডেট
+    renderList(); 
     loader.classList.add('active');
     
-    const channel = channels.find(c => c.id === id);
-    loaderTxt.innerText = `${channel.name} লোড হচ্ছে...`;
-
     try {
         const response = await fetch(`${WORKER_URL}/api/get-stream?id=${id}`);
         const data = await response.json();
@@ -81,8 +82,7 @@ async function playChannel(id) {
             startHls(streamUrl);
         }
     } catch (e) {
-        loaderTxt.innerText = "Error! Retrying...";
-        setTimeout(() => playChannel(id), 3000);
+        setTimeout(() => playChannel(id), 2000);
     }
 }
 
@@ -96,6 +96,15 @@ function startHls(url) {
             video.play();
             loader.classList.remove('active');
         });
+        
+        // এরর রিকভারি
+        hls.on(Hls.Events.ERROR, (e, data) => {
+            if (data.fatal) {
+                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+                else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+                else startHls(url);
+            }
+        });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = url;
         video.play();
@@ -103,7 +112,7 @@ function startHls(url) {
     }
 }
 
-// ==================== UI কন্ট্রোল ফাংশনস ====================
+// ==================== UI রেন্ডারিং ====================
 
 function renderList(filter = "") {
     const filtered = channels.filter(c => c.name.toLowerCase().includes(filter.toLowerCase()));
@@ -119,12 +128,8 @@ searchInput.addEventListener('input', (e) => renderList(e.target.value));
 
 document.getElementById('toggleListBtn').addEventListener('click', (e) => {
     e.stopPropagation();
-    document.getElementById('channelList').classList.toggle('hide');
+    document.getElementById('channelList').classList.toggle('hide-sidebar'); // মোবাইলের জন্য আলাদা টগল চাইলে
     showUI();
-});
-
-document.getElementById('closeListBtn').addEventListener('click', () => {
-    document.getElementById('channelList').classList.add('hide');
 });
 
 document.getElementById('fullscreenBtn').addEventListener('click', () => {
@@ -136,16 +141,16 @@ document.getElementById('volumeSlider').addEventListener('input', (e) => {
     video.volume = e.target.value;
 });
 
-// ভিডিও স্ক্রিনে ক্লিক করলে প্লে/পজ হবে
+// ভিডিও স্ক্রিনে ক্লিক করলে প্লে/পজ
 video.addEventListener('click', () => {
     if (video.paused) video.play();
     else video.pause();
     showUI();
 });
 
-// শুরুতে অ্যাপ চালু করা
+// শুরু করা
 window.onload = () => {
     renderList();
     if (channels.length > 0) playChannel(channels[0].id);
-    resetUITimer();
+    resetIdleTimer();
 };
