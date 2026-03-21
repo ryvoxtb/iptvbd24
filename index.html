@@ -1,38 +1,40 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RYVOX Tb | Premium IPTV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RYVOX TV | Premium IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body class="ui-visible">
 
-    <!-- VIDEO CONTAINER - Fullscreen immersive -->
     <div class="video-container">
         <video id="videoPlayer" playsinline crossorigin="anonymous" preload="auto"></video>
+        
+        <!-- Premium Neon Loader -->
         <div id="loadingMessage" class="loading-overlay">
-            <div class="loader-box">
-                <div class="glow-spinner"></div>
-                <p id="loadingText">📡 স্ট্রিম লোড হচ্ছে...</p>
+            <div class="loader-content">
+                <div class="neon-spinner">
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                    <div class="ring"></div>
+                </div>
+                <p id="loadingText">📡 CONNECTING TO STREAM...</p>
             </div>
         </div>
     </div>
 
-    <!-- UI WRAPPER (Auto-hide: Channel Sidebar + Controls) -->
     <div id="uiWrapper">
-        <!-- Channel Sidebar - Premium Glassmorph -->
         <div id="channelList" class="channel-sidebar">
             <div class="sidebar-header">
-                <div class="brand"><i class="fas fa-tv"></i> চ্যানেল তালিকা</div>
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 চ্যানেল খুঁজুন...">
+                <div class="brand"><i class="fas fa-broadcast-tower"></i> RYVOX TV</div>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search Channels...">
             </div>
             <div id="channelsContainer" class="channels-grid"></div>
         </div>
 
-        <!-- Player Controls - Sleek Glass Panel -->
         <div class="player-controls">
             <div class="control-group">
                 <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
@@ -41,17 +43,15 @@
             </div>
         </div>
 
-        <!-- Mobile Toggle Button -->
         <button id="toggleListBtn" class="mobile-toggle">
             <i class="fas fa-list-ul"></i>
         </button>
     </div>
 
-    <!-- LOGO: Pure text with light sweep animation, positioned below channel list -->
     <div class="logo-container">
         <div class="ryvox-logo">
             <span class="logo-text">RYVOX</span>
-            <span class="logo-sub">Tb</span>
+            <span class="logo-sub">TV</span>
         </div>
     </div>
 
