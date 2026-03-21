@@ -2,69 +2,53 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RYVOX Tb - Smart IPTV</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RYVOX Tb - Full Screen IPTV</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body>
 
-    <header class="header-bg p-4 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex flex-col items-center md:items-start">
-                <h1 class="text-3xl font-black italic tracking-tighter">RYVOX <span class="text-blue-500">Tb</span></h1>
-                <p class="text-[10px] text-gray-500">ryvox.tb@gmail.com</p>
-            </div>
-            <nav class="hidden md:flex gap-1" id="pc-nav"></nav>
-            <div class="flex w-full md:w-64 border border-gray-700 rounded overflow-hidden">
-                <input type="text" id="searchInput" onkeyup="search()" placeholder="Search Tv..." class="w-full bg-white text-black px-3 py-1 text-sm outline-none">
-                <button class="bg-blue-500 px-4 text-white"><i class="fa fa-search"></i></button>
-            </div>
+    <!-- Full Screen Video Container -->
+    <div class="video-container">
+        <video id="videoPlayer" playsinline></video>
+        <div id="loader" class="loader"></div>
+    </div>
+
+    <!-- Channel List - Left Side -->
+    <div id="channelList" class="channel-list">
+        <div class="channel-header">
+            <h2>
+                <i class="fas fa-tv"></i>
+                TV CHANNELS
+            </h2>
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search channel...">
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto p-4 flex flex-col lg:grid lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 player-container">
-            <!-- Player Box -->
-            <div id="playerBox" class="player-box aspect-video bg-black relative cursor-pointer">
-                <!-- ছোট লোডার যা ভিডিওর উপরে আসবে কিন্তু ভিডিও থামাবে না -->
-                <div id="miniLoader" class="hidden absolute top-4 right-4 z-30">
-                    <div class="spinner-small"></div>
-                </div>
-
-                <video id="videoPlayer" class="w-full h-full" playsinline onclick="togglePlay()"></video>
-
-                <div class="controls-overlay" onclick="event.stopPropagation()">
-                    <button id="playBtn" onclick="togglePlay()" class="text-3xl text-blue-400"><i class="fa fa-play"></i></button>
-                    
-                    <div class="flex flex-col ml-4 flex-1">
-                        <span id="videoTitle" class="text-sm font-bold truncate">চ্যানেল সিলেক্ট করুন</span>
-                        <span class="text-[10px] text-red-500 font-bold uppercase animate-pulse">● Live Now</span>
-                    </div>
-
-                    <!-- Volume Control Added -->
-                    <div class="flex items-center gap-2 mr-4 group">
-                        <i class="fa fa-volume-up text-xs"></i>
-                        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1" class="w-16 h-1 accent-blue-500 cursor-pointer">
-                    </div>
-
-                    <button onclick="fullScreen()" class="text-2xl"><i class="fa fa-expand"></i></button>
-                </div>
-            </div>
-            <p id="hintText" class="text-[11px] text-blue-400 mt-2 italic text-center md:text-left">
-                * দ্রুত চ্যানেল পরিবর্তন করতে লিস্টে ক্লিক করুন।
-            </p>
+        <div id="channelsContainer"></div>
+        <div class="close-list" id="closeListBtn">
+            <i class="fas fa-times"></i>
         </div>
+    </div>
 
-        <div class="channel-list-section">
-            <h2 class="text-sm font-black mb-4 border-l-4 border-blue-500 pl-3 uppercase">Channel Guide</h2>
-            <div id="channelGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4"></div>
-        </div>
-    </main>
+    <!-- Volume Control - Will show/hide with channel list -->
+    <div id="volumeControl" class="volume-control">
+        <button id="volumeBtn" class="volume-btn">
+            <i class="fas fa-volume-up"></i>
+        </button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="volume-slider">
+    </div>
 
-    <div class="mobile-menu md:hidden" id="mobile-nav"></div>
+    <!-- Toggle Button for Mobile -->
+    <button id="toggleListBtn" class="toggle-list-btn">
+        <i class="fas fa-list-ul"></i>
+    </button>
+
+    <!-- Current Channel Info -->
+    <div class="channel-info-bar" id="channelInfoBar">
+        <span id="currentChannelName">Select Channel</span>
+        <span class="live-badge">● LIVE</span>
+    </div>
 
     <script src="script.js"></script>
 </body>
