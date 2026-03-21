@@ -1,48 +1,384 @@
-body { background-color: #000; color: #fff; padding-bottom: 90px; }
-.header-bg { background-color: #000; border-bottom: 2px solid #00a2ff; }
-
-/* Sticky Player for both Mobile and Desktop */
-.player-container { 
-    position: sticky; 
-    top: 85px; 
-    z-index: 40; 
-    background: #000; 
-    align-self: flex-start; /* পিসিতে স্ক্রল করবে না */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
 }
 
-/* For Mobile: Sticky top when scrolling channels */
-@media (max-width: 768px) {
-    .player-container {
-        top: 0;
-        margin: 0 -1rem;
-        z-index: 60;
+body {
+    background: #000;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Full Screen Video Container - Now fills entire screen */
+.video-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    z-index: 1;
+}
+
+/* Video fills entire screen without black bars */
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+    cursor: pointer;
+}
+
+/* For videos that need to maintain aspect ratio, but fill screen */
+@media (min-aspect-ratio: 16/9) {
+    video {
+        object-fit: cover;
     }
 }
 
-.nav-link { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px; color: #777; transition: 0.3s; min-width: 62px; }
-.nav-link.active { color: #00a2ff; background: rgba(0,162,255,0.15); border-radius: 8px; }
-.nav-link i { font-size: 1.1rem; }
-.nav-link span { font-size: 0.65rem; font-weight: bold; text-transform: uppercase; }
-
-.player-box { border-radius: 12px; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 0 20px rgba(0,162,255,0.1); }
-.controls-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); display: flex; align-items: center; }
-
-/* Gapless Loader Spinner */
-.spinner-small {
-    width: 25px;
-    height: 25px;
-    border: 3px solid rgba(0,162,255,0.2);
-    border-top-color: #00a2ff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+@media (max-aspect-ratio: 16/9) {
+    video {
+        object-fit: cover;
+    }
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* Loader */
+.loader {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(0, 162, 255, 0.2);
+    border-top-color: #00a2ff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    z-index: 200;
+    display: none;
+}
 
-.ch-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 12px; padding: 15px; text-align: center; transition: 0.3s; cursor: pointer; }
-.ch-card:hover { border-color: #00a2ff; transform: scale(1.03); background: #111; }
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
-.mobile-menu { position: fixed; bottom: 0; left: 0; right: 0; background: #000; border-top: 1px solid #222; display: flex; overflow-x: auto; padding: 5px; z-index: 100; }
-.mobile-menu::-webkit-scrollbar { display: none; }
+/* Channel List - Left Side */
+.channel-list {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 320px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    overflow-y: auto;
+    border-right: 2px solid #00a2ff;
+    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.5);
+}
 
-@media (min-width: 768px) { body { padding-bottom: 0; } }
+.channel-list.active {
+    transform: translateX(0);
+}
+
+/* Channel List Header */
+.channel-header {
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.98);
+    padding: 20px;
+    border-bottom: 1px solid rgba(0, 162, 255, 0.3);
+    z-index: 10;
+}
+
+.channel-header h2 {
+    color: #00a2ff;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Search Box */
+.search-box {
+    width: 100%;
+    padding: 10px 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.search-box:focus {
+    border-color: #00a2ff;
+}
+
+/* Channel Items */
+.channel-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 8px 12px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.channel-item:hover {
+    border-color: #00a2ff;
+    transform: translateX(5px);
+    background: #1a1a1a;
+}
+
+.channel-item.active {
+    border-color: #00a2ff;
+    background: rgba(0, 162, 255, 0.15);
+    box-shadow: 0 0 15px rgba(0, 162, 255, 0.2);
+}
+
+.channel-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #222;
+}
+
+.channel-info {
+    flex: 1;
+}
+
+.channel-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 4px;
+}
+
+.channel-status {
+    font-size: 10px;
+    color: #00a2ff;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.playing-indicator {
+    color: #00a2ff;
+    font-size: 12px;
+}
+
+/* Volume Control - Hidden by default, shows with channel list */
+.volume-control {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 10px 15px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    border: 1px solid rgba(0, 162, 255, 0.5);
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(20px);
+}
+
+.volume-control.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.volume-btn {
+    background: none;
+    border: none;
+    color: #00a2ff;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.volume-btn:hover {
+    transform: scale(1.1);
+}
+
+.volume-slider {
+    width: 100px;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #00a2ff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Channel Info Bar */
+.channel-info-bar {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 3px solid #00a2ff;
+    pointer-events: none;
+}
+
+.live-badge {
+    color: #ff3b3b;
+    font-size: 10px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Close Button */
+.close-list {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.3s;
+    display: none;
+}
+
+.close-list:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+/* Mobile Toggle Button */
+.toggle-list-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 55px;
+    height: 55px;
+    background: #00a2ff;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 150;
+    box-shadow: 0 4px 15px rgba(0, 162, 255, 0.4);
+    transition: all 0.3s;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+}
+
+.toggle-list-btn:active {
+    transform: scale(0.95);
+}
+
+/* Scrollbar */
+.channel-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.channel-list::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.channel-list::-webkit-scrollbar-thumb {
+    background: #00a2ff;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .channel-list {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .toggle-list-btn {
+        display: flex;
+    }
+    
+    .close-list {
+        display: flex;
+    }
+    
+    .channel-info-bar {
+        top: 10px;
+        left: 10px;
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .volume-control {
+        bottom: 100px;
+        right: 20px;
+        padding: 8px 12px;
+    }
+    
+    .volume-slider {
+        width: 80px;
+    }
+}
+
+/* Desktop Hover Effects */
+@media (min-width: 769px) {
+    .channel-list.active ~ .volume-control,
+    .volume-control.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+    }
+}
