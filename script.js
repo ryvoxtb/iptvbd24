@@ -8,7 +8,7 @@ const channels = [
     { id: '86', name: 'PEACE TV BANGLA', img: 'http://103.144.89.251/assets/images/PEACE TV BANGLA1745044480.png' }
 ];
 
-const WORKER_URL = "https://abdullah965-iptv.hf.space";
+const WORKER_URL = "https://shiny-cherry-3e9e.mdabdullahsheikh017.workers.dev";
 
 // ==================== OPTIMIZED HLS CONFIG ====================
 const hlsConfig = {
