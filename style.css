@@ -1,85 +1,262 @@
+/* ==================== VARIABLES ==================== */
 :root {
     --primary: #00a2ff;
+    --primary-glow: rgba(0, 162, 255, 0.4);
     --surface: rgba(10, 10, 15, 0.98);
+    --card-bg: rgba(255, 255, 255, 0.03);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; } /* টেক্সট সিলেকশন বন্ধ */
+/* ==================== GLOBAL RESET ==================== */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    -webkit-user-select: none; /* টেক্সট সিলেক্ট হওয়া বন্ধ */
+    user-select: none;
+}
 
 body { 
     background: #000; 
     overflow: hidden; 
     height: 100vh; 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+    color: #fff;
 }
 
-/* ভিডিও এরিয়া */
-.video-container { position: fixed; inset: 0; z-index: 1; background: #000; }
-video { width: 100%; height: 100%; object-fit: contain; }
+/* ==================== VIDEO PLAYER ==================== */
+.video-container { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 1; 
+    background: #000; 
+}
+video { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; /* ভিডিওর রেশিও ঠিক রাখবে */
+}
 
-/* UI কন্ট্রোলস */
-#uiWrapper { position: fixed; inset: 0; z-index: 100; transition: opacity 0.4s ease; }
-.ui-hidden #uiWrapper { opacity: 0; pointer-events: none; }
+/* ==================== UI WRAPPER ==================== */
+#uiWrapper { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 100; 
+    transition: opacity 0.5s ease; 
+}
+.ui-hidden #uiWrapper { 
+    opacity: 0; 
+    pointer-events: none; /* হাইড অবস্থায় ক্লিক বন্ধ */
+}
 
-/* সাইডবার - ডেস্কটপ স্টাইল */
+/* ==================== SIDEBAR ==================== */
 .channel-sidebar {
-    position: fixed; left: 0; top: 0; width: 320px; height: 100%;
-    background: var(--surface); border-right: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex; flex-direction: column; z-index: 110;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: fixed; 
+    left: 0; 
+    top: 0; 
+    width: 320px; 
+    height: 100%;
+    background: var(--surface); 
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex; 
+    flex-direction: column; 
+    z-index: 110;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
 }
-.ui-hidden .channel-sidebar { transform: translateX(-100%); }
+.ui-hidden .channel-sidebar { 
+    transform: translateX(-100%); 
+}
 
-.sidebar-header { padding: 25px 20px; background: rgba(0,0,0,0.2); }
-.brand { color: var(--primary); font-size: 20px; font-weight: 800; margin-bottom: 15px; letter-spacing: 1px; }
+.sidebar-header { 
+    padding: 30px 20px; 
+    background: rgba(0,0,0,0.3); 
+}
+.brand { 
+    color: var(--primary); 
+    font-size: 22px; 
+    font-weight: 900; 
+    margin-bottom: 20px; 
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 .search-input { 
-    width: 100%; padding: 12px 15px; background: #111; border: 1px solid #333; 
-    color: #fff; border-radius: 8px; outline: none; transition: 0.3s;
+    width: 100%; 
+    padding: 12px 18px; 
+    background: #111; 
+    border: 1px solid #333; 
+    color: #fff; 
+    border-radius: 10px; 
+    outline: none; 
+    transition: 0.3s;
+    -webkit-user-select: text; /* সার্চ বক্সে লিখতে দেয়ার জন্য */
 }
-.search-input:focus { border-color: var(--primary); background: #000; }
+.search-input:focus { 
+    border-color: var(--primary); 
+    background: #000; 
+    box-shadow: 0 0 15px var(--primary-glow);
+}
 
-/* চ্যানেল লিস্ট ও স্ক্রলবার */
-.channels-grid { flex: 1; overflow-y: auto; padding: 10px; }
-.channels-grid::-webkit-scrollbar { width: 5px; }
-.channels-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+/* ==================== CHANNEL LIST ==================== */
+.channels-grid { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 15px; 
+}
+.channels-grid::-webkit-scrollbar { 
+    width: 4px; 
+}
+.channels-grid::-webkit-scrollbar-thumb { 
+    background: #333; 
+    border-radius: 10px; 
+}
 
 .channel-card { 
-    display: flex; align-items: center; gap: 12px; padding: 10px; 
-    border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+    display: flex; 
+    align-items: center; 
+    gap: 14px; 
+    padding: 12px; 
+    border-radius: 12px; 
+    margin-bottom: 10px; 
+    cursor: pointer; 
+    transition: all 0.2s ease;
     border: 1px solid transparent;
+    background: var(--card-bg);
 }
-.channel-card:hover { background: rgba(255, 255, 255, 0.05); }
-.channel-card.active { background: rgba(0, 162, 255, 0.15); border-color: var(--primary); }
-.chan-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
-.chan-name { color: #eee; font-size: 14px; font-weight: 500; }
+.channel-card:hover { 
+    background: rgba(255, 255, 255, 0.08); 
+    transform: translateX(5px);
+}
+.channel-card.active { 
+    background: rgba(0, 162, 255, 0.15); 
+    border-color: var(--primary); 
+    box-shadow: 0 0 15px rgba(0, 162, 255, 0.2);
+}
+.chan-img { 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 10px; 
+    object-fit: cover; 
+}
+.chan-name { 
+    color: #eee; 
+    font-size: 15px; 
+    font-weight: 600; 
+}
 
-/* লোডার */
+/* ==================== NEON LOADER ==================== */
 .loading-overlay { 
-    position: absolute; inset: 0; background: #000; 
-    display: none; align-items: center; justify-content: center; z-index: 50; 
+    position: absolute; 
+    inset: 0; 
+    background: #000; 
+    display: none; 
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center; 
+    z-index: 50; 
 }
-.loading-overlay.active { display: flex; }
-.neon-spinner { width: 60px; height: 60px; position: relative; margin: 0 auto 20px; }
+.loading-overlay.active { 
+    display: flex; 
+}
+.neon-spinner { 
+    width: 70px; 
+    height: 70px; 
+    position: relative; 
+    margin-bottom: 25px; 
+}
 .ring { 
-    position: absolute; width: 100%; height: 100%; border: 3px solid transparent; 
-    border-top-color: var(--primary); border-radius: 50%; animation: rotate 1s linear infinite; 
+    position: absolute; 
+    width: 100%; 
+    height: 100%; 
+    border: 4px solid transparent; 
+    border-top-color: var(--primary); 
+    border-radius: 50%; 
+    animation: rotate 1s linear infinite; 
 }
-.ring:nth-child(2) { animation-duration: 1.5s; border-top-color: #fff; opacity: 0.5; }
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-#loadingText { color: #fff; font-size: 12px; letter-spacing: 2px; text-align: center; }
+.ring:nth-child(2) { 
+    animation-duration: 1.5s; 
+    border-top-color: #fff; 
+    opacity: 0.5; 
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+}
+@keyframes rotate { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
+}
+#loadingText { 
+    color: #fff; 
+    font-size: 13px; 
+    letter-spacing: 3px; 
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--primary);
+}
 
-/* প্লেয়ার কন্ট্রোলস */
+/* ==================== PLAYER CONTROLS ==================== */
 .player-controls { 
-    position: fixed; bottom: 25px; right: 25px; 
-    background: rgba(10, 10, 10, 0.9); padding: 10px 20px; 
-    border-radius: 50px; border: 1px solid #333;
-    display: flex; align-items: center; gap: 15px;
+    position: fixed; 
+    bottom: 30px; 
+    right: 30px; 
+    background: rgba(10, 10, 10, 0.9); 
+    padding: 12px 25px; 
+    border-radius: 60px; 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex; 
+    align-items: center; 
+    gap: 20px;
+    backdrop-filter: blur(10px);
 }
-.icon-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; transition: 0.3s; }
-.icon-btn:hover { color: var(--primary); transform: scale(1.1); }
-.slider { width: 100px; accent-color: var(--primary); cursor: pointer; }
+.icon-btn { 
+    background: none; 
+    border: none; 
+    color: #fff; 
+    font-size: 20px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+.icon-btn:hover { 
+    color: var(--primary); 
+    transform: scale(1.2); 
+}
+.slider { 
+    width: 110px; 
+    accent-color: var(--primary); 
+    cursor: pointer; 
+}
 
-/* লোগো */
-.logo-container { position: fixed; bottom: 25px; left: 340px; transition: 0.4s; z-index: 5; }
-.ui-hidden .logo-container { left: 25px; }
-.logo-text { font-size: 28px; font-weight: 900; color: #fff; }
-.logo-sub { color: var(--primary); font-size: 28px; font-weight: 900; }
+/* ==================== LOGO SWEEP ANIMATION ==================== */
+.logo-container { 
+    position: fixed; 
+    bottom: 35px; 
+    left: 350px; 
+    z-index: 5; 
+    transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+.ui-hidden .logo-container { 
+    left: 35px; 
+}
+
+.logo-text { 
+    font-size: 42px; 
+    font-weight: 950; 
+    background: linear-gradient(90deg, #fff, var(--primary), #fff); 
+    background-size: 200% auto; 
+    -webkit-background-clip: text; 
+    color: transparent; 
+    animation: shine 3s linear infinite; 
+    letter-spacing: 2px;
+}
+.logo-sub { 
+    color: var(--primary); 
+    font-size: 36px; 
+    font-weight: 900; 
+    margin-left: 5px; 
+}
+
+@keyframes shine { 
+    to { background-position: 200% center; } 
+}
