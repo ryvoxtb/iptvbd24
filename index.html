@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RYVOX TV | Premium IPTV</title>
+    <title>RYVOX TV - Desktop Edition</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -11,7 +10,7 @@
 <body class="ui-visible">
 
     <div class="video-container">
-        <video id="videoPlayer" playsinline crossorigin="anonymous" preload="auto"></video>
+        <video id="videoPlayer" crossorigin="anonymous"></video>
         
         <!-- Premium Neon Loader -->
         <div id="loadingMessage" class="loading-overlay">
@@ -27,25 +26,19 @@
     </div>
 
     <div id="uiWrapper">
-        <div id="channelList" class="channel-sidebar">
+        <aside id="channelList" class="channel-sidebar">
             <div class="sidebar-header">
                 <div class="brand"><i class="fas fa-broadcast-tower"></i> RYVOX TV</div>
                 <input type="text" id="searchInput" class="search-input" placeholder="Search Channels...">
             </div>
             <div id="channelsContainer" class="channels-grid"></div>
-        </div>
+        </aside>
 
         <div class="player-controls">
-            <div class="control-group">
-                <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" class="slider">
-                <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
-            </div>
+            <button id="volumeBtn" class="icon-btn"><i class="fas fa-volume-up"></i></button>
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" class="slider">
+            <button id="fullscreenBtn" class="icon-btn"><i class="fas fa-expand"></i></button>
         </div>
-
-        <button id="toggleListBtn" class="mobile-toggle">
-            <i class="fas fa-list-ul"></i>
-        </button>
     </div>
 
     <div class="logo-container">
