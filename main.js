@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 // এখানে আপনার GitHub Raw JSON লিঙ্কটি দিন
-const GITHUB_JSON_URL = "https://raw.githubusercontent.com/mdabdullahsk/channels-list/refs/heads/main/channels.json"; 
-const WORKER_URL = "https://ryvox-server.hf.space";
+const GITHUB_JSON_URL = "https://raw.githubusercontent.com/username/repo/main/channels.json"; 
+const WORKER_URL = "https://abdullah965-iptv.hf.space";
 
 let channels = []; // এটি খালি থাকবে, ডাটা আসবে GitHub থেকে
 let hls = null;
